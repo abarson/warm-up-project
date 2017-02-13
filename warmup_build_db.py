@@ -38,5 +38,20 @@ if __name__ == '__main__':
     #commit to the changes
     conn.commit()
     
+    #load in default db values 
+    ts = "00:00:00 - 13/2/17"
+    ts_elapsed = '0:01:01 - 00/00/00'
+    user_win = 0
+    longest_draw = 1
+    avg_per_request = 1
+    difficulty = 0
+    num_turns = 0
+    
+    curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
+                          "longest_draw, avg_per_request, difficulty,num_turns)"+
+                          " VALUES (?,?,?,?,?,?,?)",(ts,ts_elapsed,user_win,longest_draw,avg_per_request,difficulty,num_turns))
+    
+    conn.commit()
+    
     #close the connection
     conn.close()
