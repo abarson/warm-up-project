@@ -1,6 +1,6 @@
 import random
 class Opponent():
-    def __init__(self, deck, difficulty, laidDown):
+    def __init__(self, deck, difficulty, laidDown,):
         self.deck = deck
         self.difficulty = difficulty
         self.laidDown = laidDown
@@ -16,7 +16,7 @@ class Opponent():
         #On easy difficulty, the opponent asks for a random card from its hand
         if self.difficulty==0:
             num=random.randint(0,len(self.deck)-1)
-            card=self.deck[num]
+            card=self.deck[num].rank
             return card
             
             card=self.deck[-1]
@@ -25,5 +25,8 @@ class Opponent():
             #On hard or devious difficulty, the opponent asks for the last
             #card added to its hand
         elif self.difficulty==1 or self.difficulty==2:
-            card=self.deck[-1]
+            if self.recentCard != None:
+                card=self.recentCard.rank
+            else:
+                #do some stuff
             return card
