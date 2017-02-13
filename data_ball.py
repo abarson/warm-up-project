@@ -704,6 +704,3 @@ class DataBall :
         
         # if 8 not in queries, just leave this method
         return queries,False
-
-d1=DataBall()
-d1.stats_center()
