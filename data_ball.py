@@ -269,6 +269,11 @@ class DataBall :
                               its corresponding timestamp
             
         """
+        time_metrics = {1:'num_turns',2:'ts_elapsed'}
+        time_metric  = time_metrics[time_metric]
+        
+        superls = {1:'min',2:'max'}
+        supel   = superls[superl]
         
         # dictionary to map timestamps ---> game durations
         times = dict()
@@ -325,6 +330,8 @@ class DataBall :
         ------------------------------------------------------------------------
         
         """
+        time_metrics = {1:'num_turns',2:'ts_elapsed'}
+        time_metric  = time_metrics[time_metric]
         
         total       = 0 # running total of times
         total_games = 0 # number of games
@@ -412,7 +419,9 @@ class DataBall :
         Validates input unless an egregious mistake is made, in which case
         the statistics center is closed and the user is returned to the main loop
         
-        --ABOUT 75% FINISHED--
+        --ABOUT 90% FINISHED--
+        
+        --- need to have the rest of the game fully functional before being able to finish
         
         Design:
             
@@ -424,8 +433,8 @@ class DataBall :
                     -or return to home
             
             ** Stats are displayed by iterating through the queries list
-             and calling the menu_dict key associated with the query on 
-             the menu
+             and calling the appropriately following the condition tree 
+             associated with the query on the menu
              
             
             
@@ -448,7 +457,9 @@ class DataBall :
                     "|     - by minutes, seconds, etc..          |\n"+\
                     "|     - by turns                            |\n"+\
                     "|-------------------------------------------|\n"+\
-                    "| 5 - Average number of turns per game      |\n"+\
+                    "| 5 - Average game length                   |\n"+\
+                    "|     - by minutes, seconds, etc..          |\n"+\
+                    "|     - by turns                            |\n"+\
                     "|-------------------------------------------|\n"+\
                     "| 6 - Longest # turns where no cards traded |\n"+\
                     "|     out of all games                      |\n"+\
@@ -462,6 +473,7 @@ class DataBall :
         print(title_str)       
         print(menu)
         LONGEST_SHORTEST = 4
+        AVG_GAME_LEN = 5
         # attempt to get the desired menu choices of the user, validate the input
         # in the case of an egregious exception, return to the main loop
         try:
@@ -485,7 +497,10 @@ class DataBall :
             queries,ret = self.chosen_8(queries)
             if (ret):
                 return
-                
+            
+            superl = 1
+            time_metric = 1
+            time_metric_2 = 1 
             if LONGEST_SHORTEST in queries:
                 print("You entered [ 4 - Longest/Shortest Game ]\n"+\
                       "Do you want the longest game (1) or shortest game (2)")
@@ -495,6 +510,12 @@ class DataBall :
                 print("Do you want this in turns (1) or time (2)")
                 time_metric = [input("Turns or time? : ")]
                 time_metric = self.validate_input(time_metric,'option')
+            
+            if AVG_GAME_LEN in queries:
+                print("You entered [ 5 - Average Game Length]\n"+\
+                      "Do you want the length in turns (1) or time (2)")
+                time_metric_2 = [input("Turns or time : ")]
+                time_metric_2 = self.validate_input(time_metric_2,'option')
                 
             #difficulty menu
             diff_menu=  "\n"+\
@@ -521,23 +542,43 @@ class DataBall :
             # difficulty map
             difficulties = {0:'simple',1:'smart',2:'devious'}
             times = {1:'turns',2:'time'}
+            superls = {1:'Highest',2:'Lowest'}
             
-            
-            ####"""K#IFEM# incomplete
-            options = {1:['game played',self.games_played(diffs)],
-                       2:['games won',self.games_won(diffs)],
-                       3:['average dealt per turn',self.average_avg_per_req(diffs)],
-                       4:['game length ({})'.format(times[time_metric]),self.superlative_game_len(time_metric,superl,diffs)]}
+            print('======= GAME STATISTICS REPOT =======')
+            for q in queries:
+                
+                if q == 1:
+                    print('Games played by user: {}'.format(self.games_played(difficulties=diffs)))
+                    
+                elif q == 1:
+                    print('Games won by user: {}'.format(self.games_won(difficulties=diffs)))
+                
+                elif q == 3:
+                    print('Average # cards dealt per turn: {}'.format(self.average_avg_per_req(difficulties=diffs)))
+                
+                elif q == 4:
+                    print('{} game length ({}): {}'.format(superls[superl],times[time_metric[0]],self.superlative_game_len(time_metric[0],superl[0],difficulties=diffs)))
+                
+                elif q == 5:
+                    print('Average game length ({}): {}'.format(times[time_metric_2[0]],self.avg_game_len(time_metric_2[0],difficulties=diffs)))
+                
+                elif q == 6:
+                    print('Longest streak of zero-trade turns: {}'.format(self.longest_streak(difficulties=diffs)))
+                
+                elif q == 7:
+                    print('Average number of turns with zero trades: {}'.format(self.avg_streak(difficulties=diffs)))
+                    
+                elif q == 8:
+                    print('Exiting game center!')
+                    return
+                       
                 
             
         except Exception as e:
             print('Oops! an error occurred, sending back to main menu...')
+            print(e)
             return
-        
-        
-        
-        
-        
+           
     def validate_input(self,elts,c):
         """
         Validate the elements of a list as integers.
@@ -599,12 +640,13 @@ class DataBall :
                     print("{} is not an option. Choose a(n) {} between {}.".format(elts[i],c,choices[c]))
                     
                     # get more input
-                    elts[i] = str(input('Enter option : '))
+                    elts[i] = input('Enter option : ')
                     
                     # update conditions dictionary
-                    condits = {'difficulty':elts[i] in [str(n) for n in range(3)],
-                       'menu option':elts[i] in [str(n) for n in range(1,9)],
-                       'option for return':elts[i] in ['1','2']}
+                    condits = {'difficulty':elts[i] in [n for n in range(3)],
+                       'menu option':elts[i] in [n for n in range(1,9)],
+                       'option for return':elts[i] in [1,2],
+                       'option':elts[i] in [1,2]}
                        
             # cast this validated input as an int
             elts[i] = int(elts[i])
@@ -647,8 +689,6 @@ class DataBall :
                 return queries,True
         
         return queries,False
-        
-d= DataBall()
-d.close()
+
 d1=DataBall()
 d1.stats_center()
