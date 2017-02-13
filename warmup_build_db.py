@@ -33,7 +33,7 @@ if __name__ == '__main__':
     
     curs.execute("CREATE TABLE game_stats (ts_begin text, ts_elapsed text, user_win int,"+
                                          "longest_draw int, avg_per_request real,"+
-                                         "difficulty text,num_turns int,longest_empty int)")
+                                         "difficulty text,num_turns int)")
     
     #commit to the changes
     conn.commit()

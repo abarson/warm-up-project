@@ -116,10 +116,12 @@ class DataBall :
         
         # write game stats to database
         self.curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
-                          "longest_draw, avg_per_request, difficulty)"+
-                          " VALUES (?,?,?,?,?,?)",(ts_str,elapsed_str,win,
+                          "longest_draw, avg_per_request, difficulty,num_turns)"+
+                          " VALUES (?,?,?,?,?,?,?)",(ts_str,elapsed_str,win,
                                                    self.top_empty_guess_ct,
-                                                   avg_per_request, self.difficulty))
+                                                   avg_per_request, 
+                                                   self.difficulty,
+                                                   self.turn_number))
                                                    
         # commit the changes
         self.conn.commit()
@@ -544,13 +546,13 @@ class DataBall :
             times = {1:'turns',2:'time'}
             superls = {1:'Highest',2:'Lowest'}
             
-            print('======= GAME STATISTICS REPOT =======')
+            print('======= GAME STATISTICS REPORT =======')
             for q in queries:
                 
                 if q == 1:
                     print('Games played by user: {}'.format(self.games_played(difficulties=diffs)))
                     
-                elif q == 1:
+                elif q == 2:
                     print('Games won by user: {}'.format(self.games_won(difficulties=diffs)))
                 
                 elif q == 3:
