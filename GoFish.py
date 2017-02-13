@@ -18,9 +18,10 @@ HAND_SIZE = 7
 
 DEBUG = False
 def main():
-    
+    dataBall = DataBall()
     print("Welcome to Go Fish!")
-    gameGoing = gameStart()
+    request = gameStart()
+    gameGoing = (request == "go")
                 
     if (gameGoing):
         
@@ -69,7 +70,7 @@ def main():
                 laidDown.addCards(opponent.deck.removeAll(i))
                 opponent.addBook()
                 print("This is incredible! The computer player started the game off with a book.")
-    request = ""
+    
     while(gameGoing):
         #Player's turn
         player.deck.sort()
@@ -94,20 +95,20 @@ def main():
                         print("Computer score: ", format(opponent.books, '2d'))
                         print("~~~~~~~~~~~~~~~~~~~\n")
                     elif (request == SHOW_BOOKS):
-                        print("\n~~~~~~~BOOKS~~~~~~~")
+                        print("\n~~~~~~~~~~~~~~BOOKS~~~~~~~~~~~~~~~")
                         if (len(laidDown.cards)==0):
                             print("No books have been laid down, yet!")
                         else:
                             laidDown.printDeck()
-                        print("~~~~~~~~~~~~~~~~~~~\n")
+                        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
                     elif (request == HELP):
                         helpMethods()
                     elif (request == SHOW_RULES):
                         showRules()
                     elif (request == CHECK_STOCK):
-                        print("\n~~~~~~~~~~~~~~~~~~~")
+                        print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                         print("The stock deck has",len(stock.cards),"cards remaining.")
-                        print("~~~~~~~~~~~~~~~~~~~\n")
+                        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
                     elif (request == "cpu"):
                         opponent.deck.printDeck()
                     else:
@@ -126,12 +127,21 @@ def main():
                         request = formatRank(formated_request)
                         incorrectAsk = False #a valid card was asked for
                         if (opponent.checkDeck(formated_request)): ##let the opponent lie!
-                            amount = opponent.deck.count(formated_request)
                             #just so it prints out grammatically correct
+                            amount = opponent.deck.count(formated_request)
+                            numString = ""
+                            plural = ""
                             if (amount == 1):
-                                print("The opponent has a ", request, "!", sep = "")
+                                numString = "one"
+                            elif (amount == 2):
+                                numString = "two"
+                                plural = "s"
                             else:
-                                print("The opponent has ", amount, " ", request, "s!", sep = "")
+                                numString = "three"
+                                plural = "s"
+                            print("The opponent has ", numString, " ", request, plural,
+                                  "! They hand over ", numString, " ", request, plural, ".", sep = "")
+                            
                             player.deck.addCards(opponent.deck.removeAll(formated_request))
                             #check for a book
                             if (player.deck.hasBook(formated_request)):
@@ -188,6 +198,7 @@ def main():
             else:
                 gameGoing = False
                 incorrectAsk = False
+        #when laidDown has all the cards, the game is over
         if (len(laidDown.cards) == 52):
             gameGoing = False
         #Opponent's turn
@@ -233,12 +244,12 @@ def main():
     print("~~~~~GAME OVER~~~~~")
     if (request != SENTINEL):
         print("All 13 books have been laid down!")
-    print("Player Score:", player.books)
-    print("Opponent Score:",opponent.books)
-    if (player.books > opponent.books):
-        print("Congratulations! You won!!")
-    else:
-        print("The opponent won!")
+        print("Player Score:", player.books)
+        print("Opponent Score:",opponent.books)
+        if (player.books > opponent.books):
+            print("Congratulations! You won!!")
+        else:
+            print("The opponent won!")
     print("Goodbye!")
 
 #helps the user get oriented upon opening the application. Should eventually include commands for database.
@@ -256,7 +267,7 @@ def gameStart():
                 print("This command can only be used while a game is ongoing.")
             else:
                 print("Please enter a valid option.")
-    return command == "go"
+    return command
 # prints out the rules of the game
 def showRules():
     print("The objective of Go Fish is to obtain as many \"books\", or four of a kinds, as possible.")
@@ -269,6 +280,9 @@ def showRules():
 
 # prints out every command the user can give to the console
 def helpMethods():
+    print("\n~~~~~~~~~~~COMMANDS~~~~~~~~~~~")
+    print("To ask your opponent if they have a card, format your input with a question mark following the value.")
+    print("**For example** \"king?\" means you wish to ask for a king, and \"2?\" means you wish to ask for a 2.", sep='') 
     print("Type \"", SHOW_RULES,"\" to display the rules of the game.",sep="")
     print("Type \"", SHOW_HAND,"\" to show the contents of your hand.",sep="")
     print("Type \"", CHECK_STOCK,"\" to show how many cards the stock deck has remaining.",sep="")
@@ -278,6 +292,7 @@ def helpMethods():
     print("Type \"", SKIP_TURN,"\" if it is your turn, you have no cards remaining in your hand, and the"
           ," stock deck is empty. (Note, at this point, there is nothing else you can do in the game.)", sep="")
     print("Type \"", SENTINEL,"\" to exit the game at any time without saving.", sep="")
+    print("~~~~~~~~~~~COMMANDS~~~~~~~~~~~\n")
             
 # this method should take the user's input and return a value that can be checked, or false if it's invalid
 # for example, user_input = kings? should return 13
