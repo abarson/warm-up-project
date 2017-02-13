@@ -14,62 +14,64 @@ GO_FISH = "go fish"
 SKIP_TURN = "skip"
 HAND_SIZE = 7
 
+DEBUG = False
 def main():
-
+    
     print("Welcome to Go Fish!")
-    command = ""
-    while (command != "go"):
-        command = input("Enter \"go\" to start the game, or \"help\" for more options: ")
-        if (command != "go"):
-            if (command == "help"):
-                helpMethods()
-            elif (command == SHOW_RULES):
-                showRules()
-            else:
-                print("Please enter a valid option.")
-    
-    #get the difficulty
-    difficulty = int(input("Enter user difficulty (0 = easy, 1 = smart, 2 = devious): "))
-    #dataBall = DataBall(difficulty)
-    #dataBall.update()
-    #start creating all the objects
-    
-    stock = Deck()
-    stock.shuffle()
-    laidDown = Deck([]) # all the books the have been laid down
-    
-    #make two more decks out of the card lists
-    card5 = Card(Card.DIAMONDS, 5)
-    card6 = Card(Card.DIAMONDS, Card.QUEEN)
-    card7 = Card(Card.CLUBS, Card.KING)
-    card8 = Card(Card.CLUBS, Card.ACE)
-    card9 = Card(Card.DIAMONDS, Card.ACE)
-    card10 = Card(Card.SPADES, Card.ACE)
-    card11 = Card(Card.HEARTS, Card.ACE)
-    playerTestHand = [card8, card9, card10, card11]
-    
-    #playerHand = Deck(stock.deal(HAND_SIZE))
-    #opponentHand = Deck(stock.deal(HAND_SIZE))
-            
-    player = Player(Deck(stock.deal(HAND_SIZE)))
-    opponent = Opponent(Deck(stock.deal(HAND_SIZE)), difficulty, laidDown)
+    gameGoing = gameStart()
+                
+    if (gameGoing):
+        
+        #get the difficulty
+        difficulty = -1
+        while(difficulty != 0 and difficulty != 1 and difficulty != 2):
+            try:
+                difficulty = int(input("Enter user difficulty (0 = easy, 1 = smart, 2 = devious): "))
+                if (difficulty != 0 and difficulty != 1 and difficulty != 2):
+                    print("Please enter either 0, 1, or 2.")
+            except:
+                print("Please enter either 0, 1, or 2.")
+                
+        print("Game start!")
+        
+        #dataBall = DataBall(difficulty)
+        #dataBall.update()
+        #start creating all the objects
+        
+        stock = Deck()
+        stock.shuffle()
+        laidDown = Deck([]) # all the books the have been laid down
+        
+        if (DEBUG):
+            card5 = Card(Card.DIAMONDS, 5)
+            card6 = Card(Card.DIAMONDS, Card.QUEEN)
+            card7 = Card(Card.CLUBS, Card.KING)
+            card8 = Card(Card.CLUBS, Card.ACE)
+            card9 = Card(Card.DIAMONDS, Card.ACE)
+            card10 = Card(Card.SPADES, Card.ACE)
+            card11 = Card(Card.HEARTS, Card.ACE)
+            playerTestHand = [card8, card9, card10, card11]
+            player = Player(Deck(playerTestHand))
+        else:
+            player = Player(Deck(stock.deal(HAND_SIZE)))
+        
+        opponent = Opponent(Deck(stock.deal(HAND_SIZE)), difficulty, laidDown)
 
-    #check for books right away, in the off chance one of the player's has one
-    for i in range(2, Card.ACE + 1):
-        if (player.deck.hasBook(i)):
-            laidDown.addCards(player.deck.removeAll(i))
-            player.addBook()
-            print("Wow you already have a book")
-        if (opponent.deck.hasBook(i)):
-            laidDown.addCards(opponent.deck.removeAll(i))
-            opponent.addBook()
-            print("Wow they already have a book")
+        #check for books right away, in the off chance one of the player's has one
+        for i in range(2, Card.ACE + 1):
+            if (player.deck.hasBook(i)):
+                laidDown.addCards(player.deck.removeAll(i))
+                player.addBook()
+                print("This is incredible! You started the game off with a book.")
+            if (opponent.deck.hasBook(i)):
+                laidDown.addCards(opponent.deck.removeAll(i))
+                opponent.addBook()
+                print("This is incredible! The computer player started the game off with a book.")
     
-    gameGoing = True
     while(gameGoing):
         #Player's turn
         player.deck.sort()
-        print("Your turn!")
+        print("-----YOUR TURN-----")
         #if the player asks for a card they don't have, set this to true.
         incorrectAsk = True
         handEmpty = (len(player.deck.cards) == 0)
@@ -81,8 +83,9 @@ def main():
                 while (request != SENTINEL and request != SKIP_TURN and request != GO_FISH and not formated_request):
                     #check commands
                     if (request == SHOW_HAND):
-                        print("\nYour hand:")
+                        print("\n~~~~~YOUR HAND~~~~~")
                         player.deck.printDeck()
+                        print("~~~~~~~~~~~~~~~~~~~")
                         print("The stock deck has",len(stock.cards),"cards remaining.\n")
                     elif (request == SHOW_SCORE):
                         print("Player score: ", player.books)
@@ -98,7 +101,7 @@ def main():
                         print("Invalid input, please try again.")
                     request = input("What would you like? ")
                     formated_request = parseInput(request)
-                if (handEmpty and stockEmpty):
+                if (handEmpty and stockEmpty): # the order of these should be switched up, so that SENTINEL is checked for first
                     if (request != SKIP_TURN):
                         print("The stock and your hand are empty. There is nothing else you can do.")
                 elif (request != SENTINEL):
@@ -136,6 +139,7 @@ def main():
                                 print("You have four ", newCard.rankToString(), "s! +1 point", sep = "")
                                 laidDown.addCards(player.deck.removeAll(newCard.rank))
                                 player.addBook()
+                    #the user's hand is empty
                     elif (handEmpty and request != SKIP_TURN):
                         if (request != GO_FISH):
                             print("Your hand is empty! You will have to go fish.")
@@ -148,6 +152,7 @@ def main():
                             laidDown.addCards(player.deck.removeAll(newCard.rank))
                             player.addBook()
                         incorrectAsk = False
+                    #if you get here, the user did something wrong
                     else:
                         incorrectAsk = True #either the player tried to go fish when they still
                         #had cards, tried to skip when the game wasn't over, or they asked for a card they didn't have
@@ -167,9 +172,29 @@ def main():
                 incorrectAsk = False
         #Opponent's turn
         if (gameGoing):
-            print("Opponent's turn.")
+            print("-----OPPONENT TURN-----")
+            print("The opponent can't do anything yet!")
             opponent.deck.sort()
             #request = opponent.ask()
+    print("Goodbye!")
+
+#helps the user get oriented upon opening the application. Should eventually include commands for database.
+def gameStart():
+    command = ""
+    while (command != "go" and command != SENTINEL):
+        command = input("Enter \"go\" to start the game, or \"help\" for more options: ")
+        if (command != "go" and command != SENTINEL):
+            if (command == "help"):
+                helpMethods()
+            elif (command == SHOW_RULES):
+                showRules()
+            elif (command == SHOW_HAND or command == SHOW_SCORE or command == SHOW_BOOKS or command == GO_FISH
+                  or command == SKIP_TURN):
+                print("This command can only be used while a game is ongoing.")
+            else:
+                print("Please enter a valid option.")
+    return command == "go"
+# prints out the rules of the game
 def showRules():
     print("The objective of Go Fish is to obtain as many \"books\", or four of a kinds, as possible.")
     print("During your turn, you may ask the opponent for one card. This card MUST be in your hand.")
@@ -178,6 +203,8 @@ def showRules():
     print("During the opponent's turn, they will do the same for you.")
     print("To start the game, both you and the opponent will receive", HAND_SIZE, "cards.")
     print("The game ends when all 13 books have been obtained.")
+
+# prints out every command the user can give to the console
 def helpMethods():
     print("Type \"", SHOW_RULES,"\" to display the rules of the game.",sep="")
     print("Type \"", SHOW_HAND,"\" to show the contents of your hand.",sep="")
@@ -186,6 +213,7 @@ def helpMethods():
     print("Type \"", GO_FISH,"\" if it is your turn, and you have no cards remaining in your hand.",sep="")
     print("Type \"", SKIP_TURN,"\" if it is your turn, you have no cards remaining in your hand, and the"
           ," stock deck is empty. (Note, at this point, there is nothing else you can do in the game.)", sep="")
+    print("Type \"", SENTINEL,"\" to exit the game at any time without saving.", sep="")
             
 # this method should take the user's input and return a value that can be checked, or false if it's invalid
 # for example, user_input = kings? should return 13
