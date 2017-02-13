@@ -18,10 +18,7 @@ class Opponent():
             num=random.randint(0,len(self.deck)-1)
             card=self.deck[num].rank
             return card
-            
-            card=self.deck[-1]
-            return card
-            
+           
             #On hard or devious difficulty, the opponent asks for the last
             #card added to its hand
         elif self.difficulty==1 or self.difficulty==2:
