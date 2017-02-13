@@ -444,142 +444,147 @@ class DataBall :
         """
         
         # opening header for stats center
-        title_str = "\n**Welcome to your Go Fish Statistics Center**\n"  
-        menu      = "*-------------------------------------------*\n"+\
-                    "|              *~Stats Menu~*               |\n"+\
-                    "|               ------------                |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 1 - Games Played                          |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 2 - Games Won by user                     |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 3 - Average cards dealt per turn overall  |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 4 - Longest/Shortest Game in time         |\n"+\
-                    "|     - by minutes, seconds, etc..          |\n"+\
-                    "|     - by turns                            |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 5 - Average game length                   |\n"+\
-                    "|     - by minutes, seconds, etc..          |\n"+\
-                    "|     - by turns                            |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 6 - Longest # turns where no cards traded |\n"+\
-                    "|     out of all games                      |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 7 - Average # turns where no card traded  |\n"+\
-                    "|-------------------------------------------|\n"+\
-                    "| 8 - back to home                          |\n"+\
-                    "|                                           |\n"+\
-                    "*-------------------------------------------*"
-         
-        print(title_str)       
-        print(menu)
-        LONGEST_SHORTEST = 4
-        AVG_GAME_LEN = 5
-        # attempt to get the desired menu choices of the user, validate the input
-        # in the case of an egregious exception, return to the main loop
-        try:
-            menu_choices = str(input("** Please enter query choices as comma separated list: "))
-            # comes in as string representation of a tuple ^^ 
-                                                                            
-            menu_choices = menu_choices.rstrip(")").lstrip("(")  # <-- peel off ( and ) from tuple
-            
-            # split into a list based on the ',' as a separating value,
-            # make set into iterable object (list)
-            queries = list(q for q in menu_choices.split(",")) 
-            
-            # validate the user's input
-            queries = self.validate_input(queries,'menu option')
-            
-            # remove duplicates
-            queries = list(set(q for q in queries))
-            
-            # if the user chose 8 (to return to home), find out if they want to
-            # do so now or after displaying all statistics
-            queries,ret = self.chosen_8(queries)
-            if (ret):
-                return
-            
-            superl = 1
-            time_metric = 1
-            time_metric_2 = 1 
-            if LONGEST_SHORTEST in queries:
-                print("You entered [ 4 - Longest/Shortest Game ]\n"+\
-                      "Do you want the longest game (1) or shortest game (2)")
-                superl = [input("Longest, shortest or both? : ")]
-                superl = self.validate_input(superl,'option')
-                
-                print("Do you want this in turns (1) or time (2)")
-                time_metric = [input("Turns or time? : ")]
-                time_metric = self.validate_input(time_metric,'option')
-            
-            if AVG_GAME_LEN in queries:
-                print("You entered [ 5 - Average Game Length]\n"+\
-                      "Do you want the length in turns (1) or time (2)")
-                time_metric_2 = [input("Turns or time : ")]
-                time_metric_2 = self.validate_input(time_metric_2,'option')
-                
-            #difficulty menu
-            diff_menu=  "\n"+\
-                        "*-------------------------------------------*\n"+\
-                        "|            *~Difficulty Menu~*            |\n"+\
-                        "|-------------------------------------------|\n"+\
-                        "|0 - Simple                                 |\n"+\
-                        "|-------------------------------------------|\n"+\
-                        "|1 - Smart                                  |\n"+\
-                        "|-------------------------------------------|\n"+\
-                        "|2 - Devious                                |\n"+\
-                        "*-------------------------------------------*"
+        title_str = "\n**Welcome to your Go Fish Statistics Center**\n" 
         
-            print(diff_menu)
-            # get the domain of difficulties user wants to get stats on
-            diffs = str(input("** enter difficulties (comma separated) you want stats on: "))
-            diffs = diffs.rstrip(")").lstrip("(")
-                
-            # split into list, validate input, and remove duplicates
-            diffs = diffs.split(',')
-            diffs = self.validate_input(diffs,'difficulty')
-            diffs = list(set(diffs))
+        keep_going = [1]
+        
+        while keep_going[0] == 1:
+            menu      = "*-------------------------------------------*\n"+\
+                        "|              *~Stats Menu~*               |\n"+\
+                        "|               ------------                |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 1 - Games Played                          |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 2 - Games Won by user                     |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 3 - Average cards dealt per turn overall  |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 4 - Longest/Shortest Game in time         |\n"+\
+                        "|     - by minutes, seconds, etc..          |\n"+\
+                        "|     - by turns                            |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 5 - Average game length                   |\n"+\
+                        "|     - by minutes, seconds, etc..          |\n"+\
+                        "|     - by turns                            |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 6 - Longest # turns where no cards traded |\n"+\
+                        "|     out of all games                      |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 7 - Average # turns where no card traded  |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 8 - back to home                          |\n"+\
+                        "|                                           |\n"+\
+                        "*-------------------------------------------*"
             
-            # difficulty map
-            difficulties = {0:'simple',1:'smart',2:'devious'}
-            times = {1:'turns',2:'time'}
-            superls = {1:'Highest',2:'Lowest'}
-            
-            print('======= GAME STATISTICS REPORT =======')
-            for q in queries:
+            print(title_str)       
+            print(menu)
+            LONGEST_SHORTEST = 4
+            AVG_GAME_LEN = 5
+            # attempt to get the desired menu choices of the user, validate the input
+            # in the case of an egregious exception, return to the main loop
+            try:
+                menu_choices = str(input("** Please enter query choices as comma separated list: "))
+                # comes in as string representation of a tuple ^^ 
+                                                                                
+                menu_choices = menu_choices.rstrip(")").lstrip("(")  # <-- peel off ( and ) from tuple
                 
-                if q == 1:
-                    print('Games played by user: {}'.format(self.games_played(difficulties=diffs)))
-                    
-                elif q == 2:
-                    print('Games won by user: {}'.format(self.games_won(difficulties=diffs)))
+                # split into a list based on the ',' as a separating value,
+                # make set into iterable object (list)
+                queries = list(q for q in menu_choices.split(",")) 
                 
-                elif q == 3:
-                    print('Average # cards dealt per turn: {}'.format(self.average_avg_per_req(difficulties=diffs)))
+                # validate the user's input
+                queries = self.validate_input(queries,'menu option')
                 
-                elif q == 4:
-                    print('{} game length ({}): {}'.format(superls[superl],times[time_metric[0]],self.superlative_game_len(time_metric[0],superl[0],difficulties=diffs)))
+                # remove duplicates
+                queries = list(set(q for q in queries))
                 
-                elif q == 5:
-                    print('Average game length ({}): {}'.format(times[time_metric_2[0]],self.avg_game_len(time_metric_2[0],difficulties=diffs)))
-                
-                elif q == 6:
-                    print('Longest streak of zero-trade turns: {}'.format(self.longest_streak(difficulties=diffs)))
-                
-                elif q == 7:
-                    print('Average number of turns with zero trades: {}'.format(self.avg_streak(difficulties=diffs)))
-                    
-                elif q == 8:
-                    print('Exiting game center!')
+                # if the user chose 8 (to return to home), find out if they want to
+                # do so now or after displaying all statistics
+                queries,ret = self.chosen_8(queries)
+                if (ret):
                     return
-                       
                 
-            
-        except Exception as e:
-            print('Oops! an error occurred, sending back to main menu...')
-            print(e)
-            return
+                superl = 1
+                time_metric = 1
+                time_metric_2 = 1 
+                if LONGEST_SHORTEST in queries:
+                    print("You entered [ 4 - Longest/Shortest Game ]\n"+\
+                        "Do you want the longest game (1) or shortest game (2)")
+                    superl = [input("Longest, shortest or both? : ")]
+                    superl = self.validate_input(superl,'option')
+                    
+                    print("Do you want this in turns (1) or time (2)")
+                    time_metric = [input("Turns or time? : ")]
+                    time_metric = self.validate_input(time_metric,'option')
+                
+                if AVG_GAME_LEN in queries:
+                    print("You entered [ 5 - Average Game Length]\n"+\
+                        "Do you want the length in turns (1) or time (2)")
+                    time_metric_2 = [input("Turns or time : ")]
+                    time_metric_2 = self.validate_input(time_metric_2,'option')
+                    
+                #difficulty menu
+                diff_menu=  "\n"+\
+                            "*-------------------------------------------*\n"+\
+                            "|            *~Difficulty Menu~*            |\n"+\
+                            "|-------------------------------------------|\n"+\
+                            "|0 - Simple                                 |\n"+\
+                            "|-------------------------------------------|\n"+\
+                            "|1 - Smart                                  |\n"+\
+                            "|-------------------------------------------|\n"+\
+                            "|2 - Devious                                |\n"+\
+                            "*-------------------------------------------*"
+        
+                print(diff_menu)
+                # get the domain of difficulties user wants to get stats on
+                diffs = str(input("** enter difficulties (comma separated) you want stats on: "))
+                diffs = diffs.rstrip(")").lstrip("(")
+                    
+                # split into list, validate input, and remove duplicates
+                diffs = diffs.split(',')
+                diffs = self.validate_input(diffs,'difficulty')
+                diffs = list(set(diffs))
+                
+                # maps for string formatting
+                times = {1:'turns',2:'time'}
+                superls = {1:'Highest',2:'Lowest'}
+                
+                print('======= GAME STATISTICS REPORT =======')
+                
+                for q in queries: # execute each query
+                    
+                    if q == 1:
+                        print('Games played by user: {}'.format(self.games_played(difficulties=diffs)))
+                        
+                    elif q == 2:
+                        print('Games won by user: {}'.format(self.games_won(difficulties=diffs)))
+                    
+                    elif q == 3:
+                        print('Average # cards dealt per turn: {}'.format(self.average_avg_per_req(difficulties=diffs)))
+                    
+                    elif q == 4:
+                        print('{} game length ({}): {}'.format(superls[superl],times[time_metric[0]],self.superlative_game_len(time_metric[0],superl[0],difficulties=diffs)))
+                    
+                    elif q == 5:
+                        print('Average game length ({}): {}'.format(times[time_metric_2[0]],self.avg_game_len(time_metric_2[0],difficulties=diffs)))
+                    
+                    elif q == 6:
+                        print('Longest streak of zero-trade turns: {}'.format(self.longest_streak(difficulties=diffs)))
+                    
+                    elif q == 7:
+                        print('Average number of turns with zero trades: {}'.format(self.avg_streak(difficulties=diffs)))
+                        
+                    elif q == 8:
+                        print('Exiting game center!')
+                        return
+                        
+                keep_going = [input('Do you want to get more stats (1) or keep going (2)? : ')]       
+                keep_going = self.validate_input(keep_going,'option')
+                
+            except Exception as e:
+                print('Oops! an error occurred, sending back to main menu...')
+                print(e)
+                return
            
     def validate_input(self,elts,c):
         """
@@ -669,27 +674,35 @@ class DataBall :
         ------------------------------------------------------------------------
         
         """
-        if 8 in queries:
-            if len(queries) != 1:
+        if 8 in queries: #check if user will want to return
+            
+            if len(queries) != 1: # if user entered more than just 8, check if 
+                                  # want to execute the other commands
+                                  
                 print("\nYou entered [ (8) - back to home ] as an option\n"+\
                         "Would you like to go back now or after the other queries?")
                 
                 quit = [input("Type 1 for 'now' or 2 for 'later' and press enter: ")]
                 
+                # validate the input
                 quit = self.validate_input(quit,'option for return')
                 
-                if quit[0] == 1:
+                if quit[0] == 1: # if user wants to leave now, return true to
+                                 # quit out of stats_center
+                                 
                     return queries,True
                     
-                else:
+                else: #otherwise move return to home to the back of the list
                     ind_8 = queries.index(8)
                     temp = queries[len(queries)-1]
                     queries[len(queries)-1] = 8
                     queries[ind_8] = temp
             
-            else:
+            else: # if 8 is the only command, return to true to leave 
+                  # stats_center
                 return queries,True
         
+        # if 8 not in queries, just leave this method
         return queries,False
 
 d1=DataBall()
