@@ -3,6 +3,7 @@ from Game_Utilities import Card
 from Game_Utilities import Deck
 from Game_Utilities import Opponent
 from Game_Utilities import Player
+from Game_Utilities import formatRank
 
 SENTINEL = "stop"
 HELP = "help"
@@ -12,6 +13,7 @@ SHOW_SCORE = "score"
 SHOW_BOOKS = "books"
 GO_FISH = "go fish"
 SKIP_TURN = "skip"
+CHECK_STOCK = "stock"
 HAND_SIZE = 7
 
 DEBUG = False
@@ -67,7 +69,7 @@ def main():
                 laidDown.addCards(opponent.deck.removeAll(i))
                 opponent.addBook()
                 print("This is incredible! The computer player started the game off with a book.")
-    
+    request = ""
     while(gameGoing):
         #Player's turn
         player.deck.sort()
@@ -85,18 +87,29 @@ def main():
                     if (request == SHOW_HAND):
                         print("\n~~~~~YOUR HAND~~~~~")
                         player.deck.printDeck()
-                        print("~~~~~~~~~~~~~~~~~~~")
-                        print("The stock deck has",len(stock.cards),"cards remaining.\n")
+                        print("~~~~~~~~~~~~~~~~~~~\n")
                     elif (request == SHOW_SCORE):
-                        print("Player score: ", player.books)
-                        print("Computer score: ", opponent.books)
+                        print("\n~~~~~~~SCORE~~~~~~~")
+                        print("Player score: ", format(player.books, '4d'))
+                        print("Computer score: ", format(opponent.books, '2d'))
+                        print("~~~~~~~~~~~~~~~~~~~\n")
                     elif (request == SHOW_BOOKS):
-                        print("\nLaid Down Books:")
-                        laidDown.printDeck()
+                        print("\n~~~~~~~BOOKS~~~~~~~")
+                        if (len(laidDown.cards)==0):
+                            print("No books have been laid down, yet!")
+                        else:
+                            laidDown.printDeck()
+                        print("~~~~~~~~~~~~~~~~~~~\n")
                     elif (request == HELP):
                         helpMethods()
                     elif (request == SHOW_RULES):
                         showRules()
+                    elif (request == CHECK_STOCK):
+                        print("\n~~~~~~~~~~~~~~~~~~~")
+                        print("The stock deck has",len(stock.cards),"cards remaining.")
+                        print("~~~~~~~~~~~~~~~~~~~\n")
+                    elif (request == "cpu"):
+                        opponent.deck.printDeck()
                     else:
                         print("Invalid input, please try again.")
                     request = input("What would you like? ")
@@ -104,13 +117,15 @@ def main():
                 if (handEmpty and stockEmpty): # the order of these should be switched up, so that SENTINEL is checked for first
                     if (request != SKIP_TURN):
                         print("The stock and your hand are empty. There is nothing else you can do.")
+                    incorrectAsk = False
                 elif (request != SENTINEL):
                     #make sure the player is asking for a card they have already
                     if (request != GO_FISH and player.deck.hasCard(formated_request)):
                         #get rid of the question mark so it can be printed
-                        request = request[0:-1]
+                        #request = request[0:-1]
+                        request = formatRank(formated_request)
                         incorrectAsk = False #a valid card was asked for
-                        if (opponent.checkDeck(formated_request)):
+                        if (opponent.checkDeck(formated_request)): ##let the opponent lie!
                             amount = opponent.deck.count(formated_request)
                             #just so it prints out grammatically correct
                             if (amount == 1):
@@ -127,18 +142,21 @@ def main():
                         #Go fish!
                         else:
                             print("The opponent does not have any ", request,"s. Go fish!", sep = "")
-                            newCard = stock.dealTop()
-                            print("You picked up a ", newCard.toString(), ".", sep = "")
-                            player.deck.addCard(newCard)
-                            
-                            #got the card you asked for originally
-                            if (newCard.checkEquals(formated_request)):
-                                print("You picked up the card you originally asked for! Wow!")
+                            if (len(stock.cards) > 0):
+                                newCard = stock.dealTop()
+                                print("You picked up a ", newCard.toString(), ".", sep = "")
+                                player.deck.addCard(newCard)
                                 
-                            if (player.deck.hasBook(newCard.rank)):
-                                print("You have four ", newCard.rankToString(), "s! +1 point", sep = "")
-                                laidDown.addCards(player.deck.removeAll(newCard.rank))
-                                player.addBook()
+                                #got the card you asked for originally
+                                if (newCard.checkEquals(formated_request)):
+                                    print("You picked up the card you originally asked for! Wow!")
+                                    
+                                if (player.deck.hasBook(newCard.rank)):
+                                    print("You have four ", newCard.rankToString(), "s! +1 point", sep = "")
+                                    laidDown.addCards(player.deck.removeAll(newCard.rank))
+                                    player.addBook()
+                            else:
+                                print("The stock is empty. Your turn is over.")
                     #the user's hand is empty
                     elif (handEmpty and request != SKIP_TURN):
                         if (request != GO_FISH):
@@ -170,12 +188,57 @@ def main():
             else:
                 gameGoing = False
                 incorrectAsk = False
+        if (len(laidDown.cards) == 52):
+            gameGoing = False
         #Opponent's turn
         if (gameGoing):
             print("-----OPPONENT TURN-----")
-            print("The opponent can't do anything yet!")
             opponent.deck.sort()
-            #request = opponent.ask()
+            request = opponent.ask() #not implemented
+            formated_request = formatRank(request)
+            print("\"Do you have any ", formated_request, "s?\"", sep='')
+            if (player.deck.hasCard(request)):
+                amount = player.deck.count(request)
+                numString = ""
+                plural = ""
+                if (amount == 1):
+                    numString = "one"
+                elif (amount == 2):
+                    numString = "two"
+                    plural = "s"
+                else:
+                    numString = "three"
+                    plural = "s"
+                opponent.deck.addCards(player.deck.removeAll(request))
+                print("You hand over ", numString, " ", formated_request, plural, " to the opponent.", sep = '')
+                if (opponent.deck.hasBook(request)):
+                    print("The opponent has four ", formated_request, "s! +1 point", sep = "")
+                    laidDown.addCards(opponent.deck.removeAll(request))
+                    opponent.addBook()
+
+            #go fish!                   
+            else:
+                print("You don't have any ", formated_request, "s. The opponent must go fish!", sep = '')
+                if (len(stock.cards) > 0):
+                    newCard = stock.dealTop()
+                    opponent.deck.addCard(newCard) ##we'll need to update some instance variable in opponent
+                    if (opponent.deck.hasBook(newCard.rank)):
+                        print("The opponent has four ", formatRank(newCard.rank), "s! +1 point", sep = "")
+                        laidDown.addCards(opponent.deck.removeAll(newCard.rank))
+                        opponent.addBook()
+                else:
+                    print("The stock is empty. The opponent's turn is over.")
+            if (len(laidDown.cards) == 52):
+                gameGoing = False
+    print("~~~~~GAME OVER~~~~~")
+    if (request != SENTINEL):
+        print("All 13 books have been laid down!")
+    print("Player Score:", player.books)
+    print("Opponent Score:",opponent.books)
+    if (player.books > opponent.books):
+        print("Congratulations! You won!!")
+    else:
+        print("The opponent won!")
     print("Goodbye!")
 
 #helps the user get oriented upon opening the application. Should eventually include commands for database.
@@ -189,7 +252,7 @@ def gameStart():
             elif (command == SHOW_RULES):
                 showRules()
             elif (command == SHOW_HAND or command == SHOW_SCORE or command == SHOW_BOOKS or command == GO_FISH
-                  or command == SKIP_TURN):
+                  or command == SKIP_TURN or command == CHECK_STOCK):
                 print("This command can only be used while a game is ongoing.")
             else:
                 print("Please enter a valid option.")
@@ -208,6 +271,7 @@ def showRules():
 def helpMethods():
     print("Type \"", SHOW_RULES,"\" to display the rules of the game.",sep="")
     print("Type \"", SHOW_HAND,"\" to show the contents of your hand.",sep="")
+    print("Type \"", CHECK_STOCK,"\" to show how many cards the stock deck has remaining.",sep="")
     print("Type \"", SHOW_SCORE,"\" to show the score of you and your opponent.",sep="")
     print("Type \"", SHOW_BOOKS,"\" to show the books that have already been laid down.",sep="")
     print("Type \"", GO_FISH,"\" if it is your turn, and you have no cards remaining in your hand.",sep="")

@@ -1,3 +1,4 @@
+from random import randint
 class Opponent():
     def __init__(self, deck, difficulty, laidDown):
         self.deck = deck
@@ -15,8 +16,10 @@ class Opponent():
         return self.deck.hasCard(user_input)
 
     ##depending on difficulty and recentCard, the opponent asks the user for a card
-    def ask():
-        return 2
+    def ask(self):
+        rand = len(self.deck.cards)-1
+        index = randint(0, rand)
+        return self.deck.cards[index].rank
     
 class Card():
     
@@ -37,36 +40,7 @@ class Card():
         return self.rank == otherRank
 
     def rankToString(self):
-        formated_rank = ""
-        if (self.rank == 2):
-            formated_rank = "two"
-        elif (self.rank == 3):
-            formated_rank = "three"
-        elif (self.rank == 4):
-            formated_rank = "four"
-        elif (self.rank == 5):
-            formated_rank = "five"
-        elif (self.rank == 6):
-            formated_rank = "six"
-        elif (self.rank == 7):
-            formated_rank = "seven"
-        elif (self.rank == 8):
-            formated_rank = "eight"
-        elif (self.rank == 9):
-            formated_rank = "nine"
-        elif (self.rank == 10):
-            formated_rank = "ten"
-        elif (self.rank == Card.JACK):
-            formated_rank = "jack"
-        elif (self.rank == Card.QUEEN):
-            formated_rank = "queen"
-        elif (self.rank == Card.KING):
-            formated_rank = "king"
-        elif (self.rank == Card.ACE):
-            formated_rank = "ace"
-        else:
-            formated_rank = "what"
-        return formated_rank
+        return formatRank(self.rank)
     
     def toString(self):
         formated_suit = ""
@@ -96,7 +70,38 @@ class Card():
         output = str(formated_rank) + " of " + str(formated_suit)
         return output
 
-
+#takes an int and prints out the corresponding rank
+def formatRank(rank):
+    formated_rank = ""
+    if (rank == 2):
+        formated_rank = "two"
+    elif (rank == 3):
+        formated_rank = "three"
+    elif (rank == 4):
+        formated_rank = "four"
+    elif (rank == 5):
+        formated_rank = "five"
+    elif (rank == 6):
+        formated_rank = "six"
+    elif (rank == 7):
+        formated_rank = "seven"
+    elif (rank == 8):
+        formated_rank = "eight"
+    elif (rank == 9):
+        formated_rank = "nine"
+    elif (rank == 10):
+        formated_rank = "ten"
+    elif (rank == Card.JACK):
+        formated_rank = "Jack"
+    elif (rank == Card.QUEEN):
+        formated_rank = "Queen"
+    elif (rank == Card.KING):
+        formated_rank = "King"
+    elif (rank == Card.ACE):
+        formated_rank = "Ace"
+    else:
+        formated_rank = "what"
+    return formated_rank
 
 #This class has list of cards, and methods for creating, viewing, and manipulating the list
 #in various ways important to how Go Fish is played
