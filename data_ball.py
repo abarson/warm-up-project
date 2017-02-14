@@ -1,3 +1,6 @@
+"""
+AUTHOR: Dan Berenberg
+"""
 import sqlite3
 import datetime
 import os
@@ -35,27 +38,27 @@ class DataBall :
     |                                           |
     |  line numbers           contents          |
     *-------------------------------------------*
-    |   61  - 118       DataBall Constructor    |
+    |   64  - 121       DataBall Constructor    |
     *-------------------------------------------*
-    |   120 - 201      In Game Methods          |
-    |    *124 - 164       - close               |
-    |    *166 - 172       - hard_close          |
-    |    *174 - 201       - update              |
+    |   123 - 204      In Game Methods          |
+    |    *127 - 167       - close               |
+    |    *169 - 175       - hard_close          |
+    |    *177 - 204       - update              |
     *-------------------------------------------*
-    |   203 - 462      Statistics Methods       |
-    |    *207 - 224       - games_played        |
-    |    *226 - 244       - games_won           |
-    |    *246 - 259       - win_los_ratio       |
-    |    *261 - 281       - avg_per_req         |
-    |    *283 - 356       - superlative_game_len|
-    |    *358 - 414       - avg_game_len        |
-    |    *416 - 441       - longest_streak      |
-    |    *443 - 462       - avg_streak          |
+    |   206 - 465      Statistics Methods       |
+    |    *210 - 227       - games_played        |
+    |    *229 - 247       - games_won           |
+    |    *249 - 262       - win_los_ratio       |
+    |    *264 - 284       - avg_per_req         |
+    |    *287 - 359       - superlative_game_len|
+    |    *361 - 417       - avg_game_len        |
+    |    *419 - 444       - longest_streak      |
+    |    *447 - 465       - avg_streak          |
     *-------------------------------------------*
-    |   464 - 775      Statistics Center Methods|
-    |    *468 - 656       - stats_center        |
-    |    *658 - 730       - validate_input      |
-    |    *732 - 775       - chosen_9            |
+    |   467 - 778      Statistics Center Methods|
+    |    *471 - 659       - stats_center        |
+    |    *661 - 733       - validate_input      |
+    |    *735 - 778       - chosen_9            |
     *-------------------------------------------*
 """
     def __init__(self,difficulty=0):

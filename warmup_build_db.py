@@ -1,5 +1,7 @@
 
-
+"""
+AUTHOR: Dan Berenberg
+"""
 import sqlite3 # database module
 import sys,os  # overwrite checking
 
@@ -7,7 +9,7 @@ class BuildDB:
     
     """
     Build a database that stores game statistics for a game of go fish. 
-
+    
     """    
     
     # initialize build process
