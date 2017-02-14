@@ -1,5 +1,7 @@
 import sqlite3
 import datetime
+import os
+from warmup_build_db.py import BuildDB
 
 class DataBall :
     
@@ -28,31 +30,33 @@ class DataBall :
     Please find below the source code to the DataBall. As mentioned before, 
     it is broken into three sections that are delimited by rows of #.
     
-    *------------------------------------------*
-    |               Index                      |
-    |                                          |
-    |  line numbers           contents         |
-    *------------------------------------------*
-    |   48  - 98         databall constructor  |
-    *------------------------------------------*
-    |   104 - 182        In Game Methods       |
-    |    *108 - 143       - close(...)         |
-    |    *146 - 152       - hard_close()       |
-    |    *156 - 183       - update(...)        |
-    *------------------------------------------*
-    |                    Statistics Methods
-    |                     - games_played(...)
-    |                     - games_won(...)
-    |                     - win_los_ratio
-    |                     -
-    |                     -
-    |                     -
-    |                     -
-    |                     -
-    |                     - 
-    *----------------------------------------*
-    |
-    |   
+    *-------------------------------------------*
+    |                 Index                     |
+    |                                           |
+    |  line numbers           contents          |
+    *-------------------------------------------*
+    |   61  - 118       DataBall Constructor    |
+    *-------------------------------------------*
+    |   120 - 201      In Game Methods          |
+    |    *124 - 164       - close               |
+    |    *166 - 172       - hard_close          |
+    |    *174 - 201       - update              |
+    *-------------------------------------------*
+    |   203 - 462      Statistics Methods       |
+    |    *207 - 224       - games_played        |
+    |    *226 - 244       - games_won           |
+    |    *246 - 259       - win_los_ratio       |
+    |    *261 - 281       - avg_per_req         |
+    |    *283 - 356       - superlative_game_len|
+    |    *358 - 414       - avg_game_len        |
+    |    *416 - 441       - longest_streak      |
+    |    *443 - 462       - avg_streak          |
+    *-------------------------------------------*
+    |   464 - 775      Statistics Center Methods|
+    |    *468 - 656       - stats_center        |
+    |    *658 - 730       - validate_input      |
+    |    *732 - 775       - chosen_9            |
+    *-------------------------------------------*
 """
     def __init__(self,difficulty=0):
          
@@ -92,6 +96,10 @@ class DataBall :
         ------------------------------------------------------------------------                             
                                         
         """
+        if (not os.path.exists('go_fish.db')):
+            db = BuildDB()
+            del db
+        
         self.conn = sqlite3.connect('go_fish.db') #Connect to database
         self.curs = self.conn.cursor()
         
@@ -108,8 +116,7 @@ class DataBall :
         #  player had to 'go fish'
         self.empty_guesses = 0
         self.top_empty_guess_ct = 0
-    
-    
+        
 ################################################################################
 ############################## In Game Methods #################################
 ################################################################################
@@ -163,8 +170,7 @@ class DataBall :
         """
         
         self.conn.close()
-        
-        
+          
     def update(self,cards_on_req=0):
         
         """
@@ -252,7 +258,7 @@ class DataBall :
         
         return (self.games_played(difficulties) - self.games_won(difficulties)/self.games_played(difficulties))
         
-    def average_avg_per_req(self,difficulties=[0,1,2]):
+    def avg_per_req(self,difficulties=[0,1,2]):
         """
          Compute and return the average of the average number of cards per request per game
          for a given set of difficulties.
@@ -406,8 +412,7 @@ class DataBall :
                     total_games += len(games)
         
         return total/total_games # return average
-        
-        
+      
     def longest_streak(self,difficulties=[0,1,2]):
         """
         
@@ -432,9 +437,9 @@ class DataBall :
             streaks+=self.curs.fetchall() # concatenate lists
             
         max_streak = max(streaks) # find overall max (also accompanied by timestamp)
-        return max_streak # return longest streak and timestamp
-            
         
+        return max_streak # return longest streak and timestamp
+    
     def avg_streak(self,difficulties=[0,1,2]):
         """
         
@@ -613,7 +618,7 @@ class DataBall :
                         print('[ (3) Win/Loss ratio ] : {}'.format(self.win_loss_ratio(difficulties=diffs)))
                         
                     elif q == 4:
-                        print('[ (4) Average # cards dealt per turn ] : {}'.format(self.average_avg_per_req(difficulties=diffs)))
+                        print('[ (4) Average # cards dealt per turn ] : {}'.format(self.avg_per_req(difficulties=diffs)))
                     
                     elif q == 5:
                         superl_game_lens = self.superlative_game_len(time_metric[0],superl[0],difficulties=diffs)
@@ -768,5 +773,3 @@ class DataBall :
         
         # if 9 not in queries, just leave this method
         return queries,False
-d = DataBall()
-d.stats_center()
