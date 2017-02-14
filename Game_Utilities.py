@@ -6,20 +6,65 @@ class Opponent():
         self.laidDown = laidDown
         self.books = 0
         self.recentCard = None
-
+        self.lastAskedFor = None
+        self.lieCounter = 4
     #add a book
     def addBook(self):
         self.books += 1
+
+    #the most recent card from going fish
+    def setRecentCard(self, user_input):
+        self.recentCard = user_input
+        
+    #should find the next card in the rotation of the opponent's deck
+    def findNextCard(self):
+        if (self.lastAskedFor == None):
+            i = 2
+            while (not self.deck.hasCard(i)):
+                i+=1
+            self.lastAskedFor = i
+        else:
+            self.lastAskedFor += 1
+            while(not self.deck.hasCard(self.lastAskedFor)):
+                self.lastAskedFor += 1
+                if (self.lastAskedFor > Card.ACE):
+                    self.lastAskedFor = 2
+                
+            
     
     ##depending on difficulty, the Opponent might lie       
     def checkDeck(self, user_input):
-        return self.deck.hasCard(user_input)
+        hasCard = self.deck.hasCard(user_input)
+        if (self.difficulty < 2):
+            return hasCard
+        else:
+            #print("Lie counter:", self.lieCounter)
+            #lie every third time
+            if (hasCard and self.lieCounter % 3 == 0):
+                print(">:-)")
+                self.lieCounter+=1
+                return False
+            elif (hasCard):
+                self.lieCounter+=1
+                return hasCard
+            else:
+                return hasCard
 
     ##depending on difficulty and recentCard, the opponent asks the user for a card
     def ask(self):
-        rand = len(self.deck.cards)-1
-        index = randint(0, rand)
-        return self.deck.cards[index].rank
+        #just choose a random card from its hand
+        if (self.difficulty == 0):
+            rand = len(self.deck.cards)-1
+            index = randint(0, rand)
+            return self.deck.cards[index].rank
+        #either ask for the last card picked up thru going fish, or continue in card
+        #rotation
+        elif (self.difficulty == 1 or self.difficulty == 2):
+            if (self.recentCard != None):
+                return self.recentCard
+            else:
+                self.findNextCard()
+                return self.lastAskedFor
     
 class Card():
     
@@ -116,6 +161,7 @@ class Deck():
                     self.cards.append(Card(i, j))
         else:
             self.cards = i
+        
             
     #Checks through the deck to see if it contains a certain card   
     def hasCard(self, rank):

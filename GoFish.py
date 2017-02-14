@@ -16,7 +16,6 @@ SKIP_TURN = "skip"
 CHECK_STOCK = "stock"
 HAND_SIZE = 7
 
-DEBUG = False
 def main():
     dataBall = DataBall()
     print("Welcome to Go Fish!")
@@ -45,18 +44,7 @@ def main():
         stock.shuffle()
         laidDown = Deck([]) # all the books the have been laid down
         
-        if (DEBUG):
-            card5 = Card(Card.DIAMONDS, 5)
-            card6 = Card(Card.DIAMONDS, Card.QUEEN)
-            card7 = Card(Card.CLUBS, Card.KING)
-            card8 = Card(Card.CLUBS, Card.ACE)
-            card9 = Card(Card.DIAMONDS, Card.ACE)
-            card10 = Card(Card.SPADES, Card.ACE)
-            card11 = Card(Card.HEARTS, Card.ACE)
-            playerTestHand = [card8, card9, card10, card11]
-            player = Player(Deck(playerTestHand))
-        else:
-            player = Player(Deck(stock.deal(HAND_SIZE)))
+        player = Player(Deck(stock.deal(HAND_SIZE)))
         
         opponent = Opponent(Deck(stock.deal(HAND_SIZE)), difficulty, laidDown)
 
@@ -80,6 +68,9 @@ def main():
         handEmpty = (len(player.deck.cards) == 0)
         stockEmpty = (len(stock.cards) == 0)
         while(incorrectAsk):
+            print("\n~~~~~YOUR HAND~~~~~")
+            player.deck.printDeck()
+            print("~~~~~~~~~~~~~~~~~~~\n")
             request = input("What would you like? ")
             if (request != SENTINEL):
                 formated_request = parseInput(request)
@@ -127,6 +118,10 @@ def main():
                         request = formatRank(formated_request)
                         incorrectAsk = False #a valid card was asked for
                         if (opponent.checkDeck(formated_request)): ##let the opponent lie!
+                            #if we obtained the last card the opponent picked up from going
+                            #fish, then the opponent should no longer try and ask for it.
+                            if (formated_request == opponent.recentCard):
+                                opponent.setRecentCard(None)
                             #just so it prints out grammatically correct
                             amount = opponent.deck.count(formated_request)
                             numString = ""
@@ -205,40 +200,59 @@ def main():
         if (gameGoing):
             print("-----OPPONENT TURN-----")
             opponent.deck.sort()
-            request = opponent.ask() #not implemented
-            formated_request = formatRank(request)
-            print("\"Do you have any ", formated_request, "s?\"", sep='')
-            if (player.deck.hasCard(request)):
-                amount = player.deck.count(request)
-                numString = ""
-                plural = ""
-                if (amount == 1):
-                    numString = "one"
-                elif (amount == 2):
-                    numString = "two"
-                    plural = "s"
-                else:
-                    numString = "three"
-                    plural = "s"
-                opponent.deck.addCards(player.deck.removeAll(request))
-                print("You hand over ", numString, " ", formated_request, plural, " to the opponent.", sep = '')
-                if (opponent.deck.hasBook(request)):
-                    print("The opponent has four ", formated_request, "s! +1 point", sep = "")
-                    laidDown.addCards(opponent.deck.removeAll(request))
-                    opponent.addBook()
-
-            #go fish!                   
-            else:
-                print("You don't have any ", formated_request, "s. The opponent must go fish!", sep = '')
-                if (len(stock.cards) > 0):
-                    newCard = stock.dealTop()
-                    opponent.deck.addCard(newCard) ##we'll need to update some instance variable in opponent
-                    if (opponent.deck.hasBook(newCard.rank)):
-                        print("The opponent has four ", formatRank(newCard.rank), "s! +1 point", sep = "")
-                        laidDown.addCards(opponent.deck.removeAll(newCard.rank))
+            if(len(opponent.deck.cards) > 0):
+                request = opponent.ask() 
+                formated_request = formatRank(request)
+                print("\"Do you have any ", formated_request, "s?\"", sep='')
+                if (player.deck.hasCard(request)):
+                    opponent.setRecentCard(None)
+                    amount = player.deck.count(request)
+                    numString = ""
+                    plural = ""
+                    if (amount == 1):
+                        numString = "one"
+                    elif (amount == 2):
+                        numString = "two"
+                        plural = "s"
+                    else:
+                        numString = "three"
+                        plural = "s"
+                    opponent.deck.addCards(player.deck.removeAll(request))
+                    print("You hand over ", numString, " ", formated_request, plural, " to the opponent.", sep = '')
+                    if (opponent.deck.hasBook(request)):
+                        print("The opponent has four ", formated_request, "s! +1 point", sep = "")
+                        laidDown.addCards(opponent.deck.removeAll(request))
                         opponent.addBook()
+
+                #go fish!                   
                 else:
-                    print("The stock is empty. The opponent's turn is over.")
+                    print("You don't have any ", formated_request, "s. The opponent must go fish!", sep = '')
+                    if (len(stock.cards) > 0):
+                        opponent.setRecentCard(None)
+                        newCard = stock.dealTop()
+                        firstCard = not (opponent.deck.hasCard(newCard.rank))
+                        opponent.deck.addCard(newCard) ##we'll need to update some instance variable in opponent
+                        if (opponent.deck.hasBook(newCard.rank)):
+                            print("The opponent has four ", formatRank(newCard.rank), "s! +1 point", sep = "")
+                            laidDown.addCards(opponent.deck.removeAll(newCard.rank))
+                            opponent.addBook()
+                        elif (firstCard):
+                            opponent.setRecentCard(newCard.rank)
+                    else:
+                        print("The stock is empty. The opponent's turn is over.")
+            elif (len(stock.cards) == 0):
+                print("The stock and the opponent's hand are empty. There is nothing else they can do.")
+            else:
+                print("The opponent has no cards! They must go fish.")
+                opponent.setRecentCard(None)
+                newCard = stock.dealTop()
+                firstCard = not (opponent.deck.hasCard(newCard.rank))
+                opponent.deck.addCard(newCard) 
+                if (opponent.deck.hasBook(newCard.rank)):
+                    print("The opponent has four ", formatRank(newCard.rank), "s! +1 point", sep = "")
+                    laidDown.addCards(opponent.deck.removeAll(newCard.rank))
+                    opponent.addBook()
+                        
             if (len(laidDown.cards) == 52):
                 gameGoing = False
     print("~~~~~GAME OVER~~~~~")
@@ -248,9 +262,12 @@ def main():
         print("Opponent Score:",opponent.books)
         if (player.books > opponent.books):
             print("Congratulations! You won!!")
-        else:
+        elif (player.books < opponent.books):
             print("The opponent won!")
-    print("Goodbye!")
+        else:
+            print("It's a tie!")
+    else:
+        print("Goodbye!")
 
 #helps the user get oriented upon opening the application. Should eventually include commands for database.
 def gameStart():

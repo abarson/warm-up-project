@@ -9,7 +9,10 @@ class Opponent():
     ##depending on difficulty, the Opponent might lie       
     def checkDeck(self, user_input):
         return self.deck.hasCard(user_input)
-
+    
+    def setRecentCard(self, user_input):
+        self.recentCard = user_input
+        
     ##depending on difficulty and recentCard, the opponent asks the user for a card
     def ask():
         return 2
