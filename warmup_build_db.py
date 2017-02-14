@@ -39,8 +39,8 @@ if __name__ == '__main__':
     conn.commit()
     
     #load in default db values 
-    ts = "00:00:00 - 13/2/17"
-    ts_elapsed = '0:01:01 - 00/00/00'
+    ts = "00:00:00 - 2/13/2017"
+    ts_elapsed = '0:00:00 - 2/13/2017'
     user_win = 0
     longest_draw = 1
     avg_per_request = 1

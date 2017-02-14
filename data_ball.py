@@ -1,4 +1,3 @@
-
 import sqlite3
 import datetime
 
@@ -10,23 +9,51 @@ class DataBall :
     at the end. During this time, DataBall is collecting specific measurements about
     the game.
     
-    The class is divided into two parts, methods used in game and methods used 
-    in order to query statistics. 
+    The class is divided into three parts, methods used in game, methods used 
+    in order to query and calculate statistics, and methods associated with running
+    the Statistics Center of DataBall. 
     
     Current list of statistics offered: 
         -Games played
-        -games won by user (lost by user)
+        -games won by user
         -average number of cards dealt per request per game 
-        -Longest/shortest game (time/turns)
+        -Longest/shortest game in time/turns
         -Average number of turns
         -Average time played per game
         -Longest streak of guesses resulting in 'Go Fish' (empty guesses)
             - out of all games
             
         -Average value for longest streaks of empty guesses
-       
+        
+    Please find below the source code to the DataBall. As mentioned before, 
+    it is broken into three sections that are delimited by rows of #.
+    
+    *------------------------------------------*
+    |               Index                      |
+    |                                          |
+    |  line numbers           contents         |
+    *------------------------------------------*
+    |   48  - 98         databall constructor  |
+    *------------------------------------------*
+    |   104 - 182        In Game Methods       |
+    |    *108 - 143       - close(...)         |
+    |    *146 - 152       - hard_close()       |
+    |    *156 - 183       - update(...)        |
+    *------------------------------------------*
+    |                    Statistics Methods
+    |                     - games_played(...)
+    |                     - games_won(...)
+    |                     - win_los_ratio
+    |                     -
+    |                     -
+    |                     -
+    |                     -
+    |                     -
+    |                     - 
+    *----------------------------------------*
+    |
+    |   
 """
-
     def __init__(self,difficulty=0):
          
         """
@@ -105,7 +132,7 @@ class DataBall :
         elapsed         = datetime.datetime.now() - self.ts
         # convert timestamps to strings (hour:minute:second - day/month/year)
         elapsed_str     = str(elapsed)
-        ts_str          = self.ts.strftime("%H:%M:%S - %d/%m/%Y")
+        ts_str          = self.ts.strftime("%H:%M:%S - %m/%d/%Y")
         
         # computer average number of cards per request
         avg_per_request = self.cards_per_request/self.turn_number    
@@ -256,13 +283,17 @@ class DataBall :
         
         Parameters:         data type   purpose
             
-            time_metric      string     denote whether to measure in 'turns' or 'tradit'
-                                        'num_turns'  --->  turn wise duration
-                                        'ts_elapsed' --->  traditional time scale
+            time_metric       int       denote whether to measure in 'turns' or 'traditional time'.
+                                        -accepted inputs: 1,2
+                                        
+                                        1 --> 'num_turns'  --->  turn wise duration
+                                        2 --> 'ts_elapsed' --->  traditional time scale
         ------------------------------------------------------------------------
             superl           string     denote whether to take max or min of set
-                                        'max'    --->  maximum
-                                        'min'    --->  minimum
+                                        -accepted inputs: 1,2
+                                        
+                                        1 --> 'max'    --->  maximum
+                                        2 --> 'min'    --->  minimum
         ------------------------------------------------------------------------
             difficulties     list       specified difficulties to query 
         ------------------------------------------------------------------------
@@ -271,11 +302,13 @@ class DataBall :
                               its corresponding timestamp
             
         """
+        
+        # map inputs to throughputs
         time_metrics = {1:'num_turns',2:'ts_elapsed'}
         time_metric  = time_metrics[time_metric]
         
-        superls = {1:'min',2:'max'}
-        supel   = superls[superl]
+        superls = {2:'min',1:'max'}
+        superl   = superls[superl]
         
         # dictionary to map timestamps ---> game durations
         times = dict()
@@ -301,12 +334,11 @@ class DataBall :
             # is greater or less than superl_elt
             for k in keys:
                 if superl == 'max': # <--- max case
-                    print(times[k])
                     if times[k] > superl_elt[0]:
                        superl_elt = [times[k],k]
                 
                 else: # <---- min case
-                    if times[keys[k]] < superl_elt[0]:
+                    if times[k] < superl_elt[0]:
                         superl_elt = [times[k],k]
             
             return superl_elt #return the superlative (min/max) element
@@ -325,47 +357,64 @@ class DataBall :
          Parameters:         data type   purpose
             
             time_metric      string     denote whether to measure in 'turns' or 'tradit'
-                                        'num_turns'  --->  turn wise duration
-                                        'ts_elapsed' --->  traditional time scale
+                                         -accepted inputs: 1,2
+                                        
+                                        1 --> 'num_turns'  --->  turn wise duration
+                                        2 --> 'ts_elapsed' --->  traditional time scale
+
         ------------------------------------------------------------------------
             difficulties     list       specified difficulties to query 
         ------------------------------------------------------------------------
         
         """
+        # map inputs to throughputs
         time_metrics = {1:'num_turns',2:'ts_elapsed'}
         time_metric  = time_metrics[time_metric]
         
-        total       = 0 # running total of times
-        total_games = 0 # number of games
+        if time_metric == 'ts_elapsed': # if real time is specified, 
+            total = datetime.timedelta(0) #create a timedelta object symbolizing 0
+        
+        else: # otherwise, just initialize a normal counter
+            total = 0
+            
+        total_games = 0
         
         if (time_metric in ['num_turns','ts_elapsed']):
+            
             # iterate through difficulties and query database for desired values
             for diff in difficulties:
                 self.curs.execute("SELECT {} FROM game_stats WHERE difficulty = ?".format(time_metric),(diff,))
-                games = [l[0] for l in self.curs.fetchall()]
                 
-                total         += sum(games)
-                total_games   += len(games)
                 
-        return total/total_games
+                if time_metric == 'ts_elapsed': # sum up elapsed times (timedelta objects)
+                    
+                    g = [l[0] for l in self.curs.fetchall()] # get all the queries
+                    
+                    for i in range(len(g)): 
+                        
+                        t = datetime.datetime.strptime(g[i],"%H:%M:%S - %m/%d/%Y")
+                        # parse out a datetime object from this string... ^^^ 
+                        # ... then create a timedelta object out of it
+                        elapsed = datetime.timedelta(hours=t.hour,minutes=t.minute,seconds=t.second)
+                        
+                        total+=elapsed
+                        total_games += len(g)
+                    
+                else:  # otherwise sum up turns like normal integers
+                    games = [l[0] for l in self.curs.fetchall()]
+                    total       += sum(games)
+                    total_games += len(games)
+        
+        return total/total_games # return average
         
         
-    def longest_streak(self,overall=False,difficulties=[0,1,2]):
+    def longest_streak(self,difficulties=[0,1,2]):
         """
         
         Find the overall longest streak of empty guesses for a given domain of difficulties
         
-        OR
-        
-        Find the longest streak of empty guesses for the current game.
-        
         Parameters:         data type   purpose
             
-            overall          boolean    denote whether to report the overall longest
-                                        or longest in current game 
-                                        (overall=True => report overall)
-                                      
-        ------------------------------------------------------------------------
             difficulties     list       specified difficulties to query 
         ------------------------------------------------------------------------
         
@@ -373,23 +422,18 @@ class DataBall :
             the maximum length of a streak and the time stamp of the game.
         
         """
-        if (overall): # if overall specified, query database and find max
-            
-            streaks = []  
-            for diff in difficulties: # iterate through difficulties, query db and 
-                                      # append fetched data to a list of streaks
-                                      
-                self.curs.execute("SELECT longest_draw,ts_begin FROM game_stats WHERE difficulty = ?",
+        
+        streaks = []  
+        for diff in difficulties: # iterate through difficulties, query db and 
+                                      # append fetched data to a list of streaks                              
+            self.curs.execute("SELECT longest_draw,ts_begin FROM game_stats WHERE difficulty = ?",
                                       (diff,))
                                       
-                streaks+=self.curs.fetchall() # append
+            streaks+=self.curs.fetchall() # concatenate lists
             
-            max_streak = max(streaks) # find overall max
+        max_streak = max(streaks) # find overall max (also accompanied by timestamp)
+        return max_streak # return longest streak and timestamp
             
-            return max_streak
-            
-        return self.top_empty_guess_ct # eitherwise return the current max streak
-        
         
     def avg_streak(self,difficulties=[0,1,2]):
         """
@@ -403,14 +447,15 @@ class DataBall :
         ------------------------------------------------------------------------
         
         """
-        streaks = []
+        streaks = [] 
         for diff in difficulties:
             
+            # query database for longest 0 draw streaks
             self.curs.execute("SELECT longest_draw FROM game_stats WHERE difficulty = ?",(diff,))
-            streaks+=[l[0] for l in self.curs.fetchall()]
+            streaks+=[l[0] for l in self.curs.fetchall()] # extract each 0 draw stat and concatenate to streaks
             
-        return sum(streaks)/len(streaks)
-            
+        return sum(streaks)/len(streaks) #return the average
+             
 ################################################################################
 ############################ Statistics Center #################################                    
 ################################################################################                    
@@ -459,27 +504,29 @@ class DataBall :
                         "|-------------------------------------------|\n"+\
                         "| 3 - Average cards dealt per turn overall  |\n"+\
                         "|-------------------------------------------|\n"+\
-                        "| 4 - Longest/Shortest Game in time         |\n"+\
+                        "| 4 - Win/Loss Ratio                        |\n"+\
+                        "|-------------------------------------------|\n"+\
+                        "| 5 - Longest/Shortest Game in time         |\n"+\
                         "|     - by minutes, seconds, etc..          |\n"+\
                         "|     - by turns                            |\n"+\
                         "|-------------------------------------------|\n"+\
-                        "| 5 - Average game length                   |\n"+\
+                        "| 6 - Average game length                   |\n"+\
                         "|     - by minutes, seconds, etc..          |\n"+\
                         "|     - by turns                            |\n"+\
                         "|-------------------------------------------|\n"+\
-                        "| 6 - Longest # turns where no cards traded |\n"+\
+                        "| 7 - Longest # turns where no cards traded |\n"+\
                         "|     out of all games                      |\n"+\
                         "|-------------------------------------------|\n"+\
-                        "| 7 - Average # turns where no card traded  |\n"+\
+                        "| 8 - Average # turns where no card traded  |\n"+\
                         "|-------------------------------------------|\n"+\
-                        "| 8 - back to home                          |\n"+\
+                        "| 9 - back to home                          |\n"+\
                         "|                                           |\n"+\
                         "*-------------------------------------------*"
             
             print(title_str)       
             print(menu)
-            LONGEST_SHORTEST = 4
-            AVG_GAME_LEN = 5
+            LONGEST_SHORTEST = 5
+            AVG_GAME_LEN = 6
             # attempt to get the desired menu choices of the user, validate the input
             # in the case of an egregious exception, return to the main loop
             try:
@@ -500,28 +547,31 @@ class DataBall :
                 
                 # if the user chose 8 (to return to home), find out if they want to
                 # do so now or after displaying all statistics
-                queries,ret = self.chosen_8(queries)
+                queries,ret = self.chosen_9(queries)
                 if (ret):
                     return
                 
                 superl = 1
                 time_metric = 1
                 time_metric_2 = 1 
+                
                 if LONGEST_SHORTEST in queries:
-                    print("You entered [ 4 - Longest/Shortest Game ]\n"+\
+                    print("You entered [ 5 - Longest/Shortest Game ]\n"+\
                         "Do you want the longest game (1) or shortest game (2)")
-                    superl = [input("Longest, shortest or both? : ")]
+                    superl = [input("Longest or shortest : ")]
                     superl = self.validate_input(superl,'option')
                     
                     print("Do you want this in turns (1) or time (2)")
                     time_metric = [input("Turns or time? : ")]
                     time_metric = self.validate_input(time_metric,'option')
-                
+                    print('\n')
+                    
                 if AVG_GAME_LEN in queries:
-                    print("You entered [ 5 - Average Game Length]\n"+\
+                    print("You entered [ 6 - Average Game Length]\n"+\
                         "Do you want the length in turns (1) or time (2)")
                     time_metric_2 = [input("Turns or time : ")]
                     time_metric_2 = self.validate_input(time_metric_2,'option')
+                    print('\n')
                     
                 #difficulty menu
                 diff_menu=  "\n"+\
@@ -554,33 +604,47 @@ class DataBall :
                 for q in queries: # execute each query
                     
                     if q == 1:
-                        print('Games played by user: {}'.format(self.games_played(difficulties=diffs)))
+                        print('[ (1) Games played ] : {}'.format(self.games_played(difficulties=diffs)))
                         
                     elif q == 2:
-                        print('Games won by user: {}'.format(self.games_won(difficulties=diffs)))
+                        print('[ (2) Games won ] : {}'.format(self.games_won(difficulties=diffs)))
                     
                     elif q == 3:
-                        print('Average # cards dealt per turn: {}'.format(self.average_avg_per_req(difficulties=diffs)))
-                    
+                        print('[ (3) Win/Loss ratio ] : {}'.format(self.win_loss_ratio(difficulties=diffs)))
+                        
                     elif q == 4:
-                        print('{} game length ({}): {}'.format(superls[superl],times[time_metric[0]],self.superlative_game_len(time_metric[0],superl[0],difficulties=diffs)))
+                        print('[ (4) Average # cards dealt per turn ] : {}'.format(self.average_avg_per_req(difficulties=diffs)))
                     
                     elif q == 5:
-                        print('Average game length ({}): {}'.format(times[time_metric_2[0]],self.avg_game_len(time_metric_2[0],difficulties=diffs)))
+                        superl_game_lens = self.superlative_game_len(time_metric[0],superl[0],difficulties=diffs)
+                        if time_metric[0] == 1:
+                            superl_game_len = superl_game_lens[1]
+                            
+                        else:
+                            superl_game_len = superl_game_lens[0]
+                            
+                        print('[ (5) {} game length ({}) ] : {}'.format(superls[superl[0]],times[time_metric[0]],superl_game_len))
                     
-                    elif q == 6:
-                        print('Longest streak of zero-trade turns: {}'.format(self.longest_streak(difficulties=diffs)))
+                    elif q ==6:
+                        print('[ (6) Average game length ({}) ] : {}'.format(times[time_metric_2[0]],self.avg_game_len(time_metric_2[0],difficulties=diffs)))
                     
                     elif q == 7:
-                        print('Average number of turns with zero trades: {}'.format(self.avg_streak(difficulties=diffs)))
-                        
+                        longest_streak = self.longest_streak(difficulties=diffs)
+                        print('[ (7) Longest streak of zero-trade turns ] : {}, Game Played At: {}'.format(longest_streak[0],longest_streak[1]))
+                    
                     elif q == 8:
+                        print('[ (8) Average number of zero-trade turns ] : {}'.format(self.avg_streak(difficulties=diffs)))
+                        
+                    elif q == 9:
                         print('Exiting game center!')
+                        print('======================================')
                         return
                         
-                keep_going = [input('Do you want to get more stats (1) or keep going (2)? : ')]       
+                print('======================================')       
+                keep_going = [input('Do you want to get more stats (1) or leave the Statistics Center (2)? : ')]       
                 keep_going = self.validate_input(keep_going,'option')
                 
+
             except Exception as e:
                 print('Oops! an error occurred, sending back to main menu...')
                 print(e)
@@ -599,14 +663,14 @@ class DataBall :
                                         the validation message and verifying input
         
         ** values of 'difficulty' and 'menu option' are self explanatory
-            'option for returning' --> validates input coming from chosen_8
+            'option for returning' --> validates input coming from chosen_9
             'option' -> validates general input for the shortest/longest game in turns/time
                                 
         """
         
         # choice dictionary used to format validation message
         choices = {'difficulty':'0 and 2',
-                   'menu option':'1 and 8',
+                   'menu option':'1 and 9',
                    'option for returning':'1 and 2',
                    'option':'1 and 2'}
         
@@ -628,7 +692,7 @@ class DataBall :
                 # exception, forcing a while loop (line 558) to get good input.
             
                 condits = {'difficulty':elts[i] in [n for n in range(3)],
-                       'menu option':elts[i] in [n for n in range(1,9)],
+                       'menu option':elts[i] in [n for n in range(1,10)],
                        'option for return':elts[i] in [1,2],
                        'option':elts[i] in [1,2]}
                        
@@ -644,14 +708,14 @@ class DataBall :
                                       # for input
                     
                     # formatted validation message
-                    print("{} is not an option. Choose a(n) {} between {}.".format(elts[i],c,choices[c]))
+                    print("{} is not an option. Choose a {} between {}.".format(elts[i],c,choices[c]))
                     
                     # get more input
                     elts[i] = input('Enter option : ')
                     
                     # update conditions dictionary
                     condits = {'difficulty':elts[i] in [n for n in range(3)],
-                       'menu option':elts[i] in [n for n in range(1,9)],
+                       'menu option':elts[i] in [n for n in range(1,10)],
                        'option for return':elts[i] in [1,2],
                        'option':elts[i] in [1,2]}
                        
@@ -660,26 +724,26 @@ class DataBall :
         
         return elts
         
-    def chosen_8(self,queries):
+    def chosen_9(self,queries):
         
         """
-        Find out if the return command (option 8) has been called off the menu. If so,
+        Find out if the return command (option 9) has been called off the menu. If so,
         ask the user if they would like to display the statistics or go back to the home
         loop.
         
         Parameters      data type       purpose
 
         queries         list            the list of commands that may or may not 
-                                        contain 8
+                                        contain 9
         ------------------------------------------------------------------------
         
         """
-        if 8 in queries: #check if user will want to return
+        if 9 in queries: #check if user will want to return
             
-            if len(queries) != 1: # if user entered more than just 8, check if 
+            if len(queries) != 1: # if user entered more than just 9, check if 
                                   # want to execute the other commands
                                   
-                print("\nYou entered [ (8) - back to home ] as an option\n"+\
+                print("\nYou entered [ (9) - back to home ] as an option\n"+\
                         "Would you like to go back now or after the other queries?")
                 
                 quit = [input("Type 1 for 'now' or 2 for 'later' and press enter: ")]
@@ -693,14 +757,16 @@ class DataBall :
                     return queries,True
                     
                 else: #otherwise move return to home to the back of the list
-                    ind_8 = queries.index(8)
+                    ind_9 = queries.index(9)
                     temp = queries[len(queries)-1]
-                    queries[len(queries)-1] = 8
-                    queries[ind_8] = temp
+                    queries[len(queries)-1] = 9
+                    queries[ind_9] = temp
             
-            else: # if 8 is the only command, return to true to leave 
+            else: # if 9 is the only command, return to true to leave 
                   # stats_center
                 return queries,True
         
-        # if 8 not in queries, just leave this method
+        # if 9 not in queries, just leave this method
         return queries,False
+d = DataBall()
+d.stats_center()
