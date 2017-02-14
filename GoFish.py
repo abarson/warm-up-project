@@ -314,31 +314,48 @@ def helpMethods():
 # this method should take the user's input and return a value that can be checked, or false if it's invalid
 # for example, user_input = kings? should return 13
 def parseInput(user_input):
-    if (user_input == "2?"):
+    if (user_input == "2?" or user_input == "2" or user_input == "two?"
+        or user_input == "two" or user_input == "Two" or user_input == "Two?"):
         return 2
-    elif (user_input == "3?"):
+    elif (user_input == "3?" or user_input == "3" or user_input == "three?"
+        or user_input == "three" or user_input == "Three" or user_input == "Three?"):
         return 3
-    elif (user_input == "4?"):
+    elif (user_input == "4?" or user_input == "4" or user_input == "four?"
+        or user_input == "four" or user_input == "Four" or user_input == "Four?"):
         return 4
-    elif (user_input == "5?"):
+    elif (user_input == "5?" or user_input == "5" or user_input == "five?"
+        or user_input == "five" or user_input == "Five" or user_input == "Five?"):
         return 5
-    elif (user_input == "6?"):
+    elif (user_input == "6?" or user_input == "6" or user_input == "six?"
+        or user_input == "six" or user_input == "Six" or user_input == "Six?"):
         return 6
-    elif (user_input == "7?"):
+    elif (user_input == "7?" or user_input == "7" or user_input == "seven?"
+        or user_input == "seven" or user_input == "Seven" or user_input == "Seven?"):
         return 7
-    elif (user_input == "8?"):
+    elif (user_input == "8?" or user_input == "8" or user_input == "eight?"
+        or user_input == "eight" or user_input == "Eight" or user_input == "Eight?"):
         return 8
-    elif (user_input == "9?"):
+    elif (user_input == "9?" or user_input == "9" or user_input == "nine?"
+        or user_input == "nine" or user_input == "Nine" or user_input == "Nine?"):
         return 9
-    elif (user_input == "10?"):
+    elif (user_input == "10?" or user_input == "10" or user_input == "ten?"
+        or user_input == "ten" or user_input == "Ten" or user_input == "Ten?"):
         return 10
-    elif (user_input == "jack?"):
+    elif (user_input == "jack?" or user_input == "jack" or user_input == "j?"
+        or user_input == "j" or user_input == "Jack" or user_input == "Jack?"
+          or user_input == "J?" or user_input == "J"):
         return Card.JACK
-    elif (user_input == "queen?"):
+    elif (user_input == "queen?" or user_input == "queen" or user_input == "q?"
+        or user_input == "q" or user_input == "Queen" or user_input == "Queen?"
+          or user_input == "Q?" or user_input == "Q"):
         return Card.QUEEN
-    elif (user_input == "king?"):
+    elif (user_input == "king?" or user_input == "king" or user_input == "k?"
+        or user_input == "k" or user_input == "King" or user_input == "King?"
+          or user_input == "K?" or user_input == "K"):
         return Card.KING
-    elif (user_input == "ace?"):
+    elif (user_input == "ace?" or user_input == "ace" or user_input == "a?"
+        or user_input == "a" or user_input == "Ace" or user_input == "Ace?"
+          or user_input == "A?" or user_input == "A"):
         return Card.ACE
     else:
         return False
