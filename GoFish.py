@@ -17,10 +17,10 @@ CHECK_STOCK = "stock"
 HAND_SIZE = 7
 
 def main():
+    print("Welcome to Go Fish!")
     playAgain = True
     while(playAgain):
         dataBall = DataBall()
-        print("Welcome to Go Fish!")
         request = gameStart(dataBall)
         gameGoing = (request == "go")
                     
@@ -292,18 +292,19 @@ def main():
                 print("It's a tie!")
             #save results
             dataBall.close(win)
+            answer = input("Would you like to play again? (y/n): ")
+            while (answer != "y" and answer != "n" and answer != "yes" and answer != "no"):
+                s = "Please enter \"y\" or \"n\": "
+                answer = input(s)
+            if (answer == "n"):
+                playAgain = False
         #user prematurely quit the game
         else:
             print("Goodbye!")
-            
+            playAgain = False
             #don't save results
             dataBall.hard_close()
-        answer = input("Would you like to play again? (y/n): ")
-        while (answer != "y" and answer != "n" and answer != "yes" and answer != "no"):
-            s = "Please enter \"y\" or \"n\": "
-            answer = input(s)
-        if (answer == "n"):
-            playAgain = False
+        
 
 #helps the user get oriented upon opening the application. Should eventually include commands for database.
 def gameStart(dataBall):
