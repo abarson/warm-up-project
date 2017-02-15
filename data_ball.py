@@ -300,15 +300,15 @@ class DataBall :
     
         """
         avgs = []
-        
         for diff in difficulties:
             # query database
             self.curs.execute("SELECT avg_per_request FROM game_stats WHERE difficulty = ?",(str(diff),))
             
             for avg in self.curs.fetchall():
                 avgs.append(avg[0])
-        
-        answer = str(self.prevent_negative(sum(avgs)/(.1+(len(avgs)-self.default_val))))
+        if (len(avgs) - self.default_val) < 0:
+            return  0
+        answer = str(self.prevent_negative(sum(avgs)/((len(avgs)-self.default_val))))
         return answer[:5]
         
     def superlative_game_len(self,time_metric,superl, difficulties=[0,1,2]):
@@ -526,7 +526,7 @@ class DataBall :
              
             
             
-        So far i have finished valdating
+        
         """
         
         # opening header for stats center
