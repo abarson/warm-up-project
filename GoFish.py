@@ -5,6 +5,7 @@ from Game_Utilities import Opponent
 from Game_Utilities import Player
 from Game_Utilities import formatRank
 
+#set constant values for commands
 SENTINEL = "stop"
 HELP = "help"
 SHOW_RULES = "rules"
@@ -23,10 +24,11 @@ def main():
         dataBall = DataBall()
         request = gameStart(dataBall)
         gameGoing = (request == "go")
-                    
+
+        #initialize all the objects needed for the game                   
         if (gameGoing):
             
-            #get the difficulty
+            #get the difficulty w/ input validation
             difficulty = -1
             while(difficulty != 0 and difficulty != 1 and difficulty != 2):
                 try:
@@ -36,12 +38,13 @@ def main():
                 except:
                     print("Please enter either 0, 1, or 2.")
 
-            dataBall.difficulty =   difficulty             
+            #set the difficulty for the dataBall, for record keeping
+            dataBall.difficulty = difficulty             
             print("Game start!")
             
             stock = Deck()
             stock.shuffle()
-            laidDown = Deck([]) # all the books the have been laid down
+            laidDown = Deck([]) # all the books that have been laid down
             
             player = Player(Deck(stock.deal(HAND_SIZE)))
             
@@ -103,13 +106,16 @@ def main():
                             print("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
                             print("The stock deck has",len(stock.cards),"cards remaining.")
                             print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                            
+                        #this is for debugging purposes!
                         elif (request == "cpu"):
                             opponent.deck.printDeck()
+                            
                         else:
                             print("Invalid input, please try again.")
                         request = input("What would you like? ")
                         formated_request = parseInput(request)
-                    if (handEmpty and stockEmpty): # the order of these should be switched up, so that SENTINEL is checked for first
+                    if (handEmpty and stockEmpty): 
                         if (request != SKIP_TURN):
                             print("The stock and your hand are empty. There is nothing else you can do.")
                         incorrectAsk = False
@@ -124,12 +130,13 @@ def main():
                                 #fish, then the opponent should no longer try and ask for it.
                                 if (formated_request == opponent.recentCard):
                                     opponent.setRecentCard(None)
-                                #just so it prints out grammatically correct
+                                
                                 amount = opponent.deck.count(formated_request)
 
                                 #update the databall
                                 dataBall.update(amount)
-                                
+
+                                #just so it prints out grammatically correct
                                 numString = ""
                                 plural = ""
                                 if (amount == 1):
@@ -192,7 +199,7 @@ def main():
                             incorrectAsk = True #either the player tried to go fish when they still
                             #had cards, tried to skip when the game wasn't over, or they asked for a card they didn't have
                             if (request == GO_FISH):
-                                print("You can only request to go fish when you have no cards remaining.")
+                                print("You can only request to draw when you have no cards remaining.")
                             elif (request == SKIP_TURN):
                                 print("You can only skip your turn when you have no cards left, and the stock is empty.") 
            
@@ -244,15 +251,19 @@ def main():
                     else:
                         print("You don't have any ", formated_request, "s. The opponent must go fish!", sep = '')
                         if (len(stock.cards) > 0):
+                            
+                            #used for opponent ask method
                             opponent.setRecentCard(None)
+                            
                             newCard = stock.dealTop()
                             firstCard = not (opponent.deck.hasCard(newCard.rank))
-                            opponent.deck.addCard(newCard) ##we'll need to update some instance variable in opponent
+                            opponent.deck.addCard(newCard) 
                             if (opponent.deck.hasBook(newCard.rank)):
                                 print("The opponent has four ", formatRank(newCard.rank), "s! +1 point", sep = "")
                                 laidDown.addCards(opponent.deck.removeAll(newCard.rank))
                                 opponent.addBook()
                             elif (firstCard):
+                                #the opponent will ask for this card next turn, given it is the first instance of this card
                                 opponent.setRecentCard(newCard.rank)
                         else:
                             print("The stock is empty. The opponent's turn is over.")
@@ -314,7 +325,6 @@ def gameStart(dataBall):
         if (command != "go" and command != SENTINEL):
             if (command == "stats"):
                 dataBall.stats_center()
-                #helpMethods()
             elif (command == "help"):
                 helpMethods()
             elif (command == SHOW_RULES):
@@ -352,7 +362,7 @@ def helpMethods():
     print("~~~~~~~~~~~COMMANDS~~~~~~~~~~~\n")
             
 # this method should take the user's input and return a value that can be checked, or false if it's invalid
-# for example, user_input = kings? should return 13
+# for example, user_input = kings? should return 13. We accept a lot of different values
 def parseInput(user_input):
     if (user_input == "2?" or user_input == "2" or user_input == "two?"
         or user_input == "two" or user_input == "Two" or user_input == "Two?"):
