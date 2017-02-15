@@ -153,7 +153,7 @@ class DataBall :
                 self.top_empty_guess_ct = self.empty_guesses
         
         print("Do you want to see your most recent game's statistics?")
-        see_stats = [input("Type (1) for 'yes', (2) for 'no")]
+        see_stats = [input("Type (1) for 'yes', (2) for 'no': ")]
         see_stats = self.validate_input(see_stats,'option')
         
         if see_stats[0] == 1:
@@ -675,7 +675,6 @@ class DataBall :
 
             except Exception as e:
                 print('Oops! an error occurred, sending back to main menu...')
-                print(e)
                 return
            
     def validate_input(self,elts,c):
@@ -728,9 +727,9 @@ class DataBall :
                         pass
                     
                     else:
-                        raise NameError
+                        raise Exception
                     
-                except NameError: # if element fails to be verified
+                except Exception: # if element fails to be verified
 
                     while not condits[c]: # as long as the input is not valid, keep asking
                                         # for input
@@ -739,7 +738,7 @@ class DataBall :
                         print("{} is not an option. Choose a {} between {}.".format(elts[i],c,choices[c]))
                     
                         # get more input
-                        elts[i] = input('Enter option : ')
+                        elts[i] = int(input('Enter option : '))
                     
                         # update conditions dictionary
                         condits = {'difficulty':elts[i] in [n for n in range(3)],
@@ -752,7 +751,7 @@ class DataBall :
         
             return elts
         
-        except ValueError:
+        except Exception:
             print('Error Occurred!')
         
     def chosen_9(self,queries):
