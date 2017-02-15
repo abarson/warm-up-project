@@ -157,7 +157,7 @@ class DataBall :
         see_stats = self.validate_input(see_stats,'option')
         
         if see_stats[0] == 1:
-            self.print_stats(ts_str,elapsed_str,avg_per_request,self.top_empty_guess_ct,self.num_turns,self.difficulty)
+            self.print_stats(ts_str,elapsed_str,avg_per_request,self.top_empty_guess_ct,self.turn_number,self.difficulty)
         
         # write game stats to database
         self.curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
