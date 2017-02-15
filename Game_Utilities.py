@@ -1,4 +1,5 @@
 from random import randint
+#Author: Matthew Asis
 #The Opponent class represents the computer player. It holds fields for the deck and difficulty, and also
 #maintains an iterative card rotation. Decision making for what card to ask for is done in this class.
 class Opponent():
@@ -67,7 +68,9 @@ class Opponent():
             else:
                 self.findNextCard()
                 return self.lastAskedFor
-    
+
+#Author: Matthew Asis    
+#Card Class
 class Card():
     
     ACE = 14
@@ -80,6 +83,7 @@ class Card():
     HEARTS = 2
     DIAMONDS = 3
     
+    #Creates a card that had both a rank and suit
     def __init__(self, suit, rank):
         self.suit = suit
         self.rank = rank
@@ -236,6 +240,7 @@ class Deck():
         card=self.cards.pop()
         return card
 
+#Author: Matthew Asis
 class Player():
     def __init__(self, deck):
         self.deck = deck
