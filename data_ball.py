@@ -181,7 +181,7 @@ class DataBall :
         
         print('Start time: {}'.format(ts_str))
         print('Difficulty: {}'.format(difficulty))
-        print('Game length (in time) : {}'.format(elapsed))
+        print('Game length (in time) : {}'.format(elapsed[:7]))
         print('Game length (in turns): {}'.format(turn_number))
         print('Average # cards traded per request : {}'.format(avg_per_request))
         print('Longest streak of zero-trade turns : {}'.format(top_empty_guess_ct))
@@ -216,9 +216,10 @@ class DataBall :
     
             if (self.empty_guesses > self.top_empty_guess_ct):
                 self.top_empty_guess_ct = self.empty_guesses
-            
+                
             self.empty_guesses = 0
-        
+            
+        print(self.top_empty_guess_ct)
         # increment number of cards per request and turn number
         self.cards_per_request += cards_on_req
         self.turn_number += 1
@@ -300,8 +301,8 @@ class DataBall :
             
             for avg in self.curs.fetchall():
                 avgs.append(avg[0])
-            
-        return sum(avgs)/len(avgs)
+        
+        return str(sum(avgs)/len(avgs))[:5]
         
     def superlative_game_len(self,time_metric,superl, difficulties=[0,1,2]):
         """
@@ -434,7 +435,7 @@ class DataBall :
                     total       += sum(games)
                     total_games += len(games)
         
-        return total/total_games # return average
+        return (total/total_games) # return average
       
     def longest_streak(self,difficulties=[0,1,2]):
         """
