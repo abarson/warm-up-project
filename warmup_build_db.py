@@ -41,13 +41,34 @@ class BuildDB:
         #commit to the changes
         conn.commit()
     
-        #load in default db values 
+        #load in default db values for each difficulty
+        
+        #diff 0
         ts = "00:00:00 - 2/13/2017"
         ts_elapsed = '0:00:00 - 2/13/2017'
         user_win = 0
         longest_draw = 1
         avg_per_request = 1
         difficulty = 0
+        num_turns = 0
+        
+        #diff 1
+        ts = "00:00:00 - 2/13/2017"
+        ts_elapsed = '0:00:00 - 2/13/2017'
+        user_win = 0
+        longest_draw = 1
+        avg_per_request = 1
+        difficulty = 1
+        num_turns = 0
+        
+        #diff 2
+        #diff 0
+        ts = "00:00:00 - 2/13/2017"
+        ts_elapsed = '0:00:00 - 2/13/2017'
+        user_win = 0
+        longest_draw = 1
+        avg_per_request = 1
+        difficulty = 2
         num_turns = 0
         
         curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+

@@ -38,27 +38,28 @@ class DataBall :
     |                                           |
     |  line numbers           contents          |
     *-------------------------------------------*
-    |   64  - 121       DataBall Constructor    |
+    |   65  - 123       DataBall Constructor    |
     *-------------------------------------------*
-    |   123 - 204      In Game Methods          |
-    |    *127 - 167       - close               |
-    |    *169 - 175       - hard_close          |
-    |    *177 - 204       - update              |
+    |   124 - 217      In Game Methods          |
+    |    *128 - 168       - close               |
+    |    *170 - 179       - print_stats         |
+    |    *181 - 187       - hard_close          |
+    |    *189 - 216       - update              |
     *-------------------------------------------*
-    |   206 - 465      Statistics Methods       |
-    |    *210 - 227       - games_played        |
-    |    *229 - 247       - games_won           |
-    |    *249 - 262       - win_los_ratio       |
-    |    *264 - 284       - avg_per_req         |
-    |    *287 - 359       - superlative_game_len|
-    |    *361 - 417       - avg_game_len        |
-    |    *419 - 444       - longest_streak      |
-    |    *447 - 465       - avg_streak          |
+    |   218 - 477      Statistics Methods       |
+    |    *222 - 239       - games_played        |
+    |    *241 - 259       - games_won           |
+    |    *261 - 273       - win_los_ratio       |
+    |    *275 - 296       - avg_per_req         |
+    |    *298 - 361       - superlative_game_len|
+    |    *363 - 429       - avg_game_len        |
+    |    *431 - 433       - longest_streak      |
+    |    *435 - 447       - avg_streak          |
     *-------------------------------------------*
-    |   467 - 778      Statistics Center Methods|
-    |    *471 - 659       - stats_center        |
-    |    *661 - 733       - validate_input      |
-    |    *735 - 778       - chosen_9            |
+    |   479 - 790      Statistics Center Methods|
+    |    *483 - 671       - stats_center        |
+    |    *673 - 745       - validate_input      |
+    |    *747 - 790       - chosen_9            |
     *-------------------------------------------*
 """
     def __init__(self,difficulty=0):
@@ -165,7 +166,18 @@ class DataBall :
         
         # close connection to database
         self.conn.close()
+    
+    def print_stats(self,ts_str,elapsed,avg_per_request,top_empty_guess_ct,turn_number):
+        """
+        Print the current game's statistics.
+        """
         
+        print('Start time: {}'.format(ts_str))
+        print('Game length (in time) : {}'.format(elapsed))
+        print('Game length (in turns): {}'.format(turn_number))
+        print('Average # cards traded per request : {}'.format(avg_per_request))
+        print('Longest streak of zero-trade turns : {}'.format(top_empty_guess_ct))
+  
     def hard_close(self):
         """
         Close the DataBall class without saving anything to the database.
