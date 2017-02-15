@@ -218,8 +218,7 @@ class DataBall :
                 self.top_empty_guess_ct = self.empty_guesses
                 
             self.empty_guesses = 0
-            
-        print(self.top_empty_guess_ct)
+    
         # increment number of cards per request and turn number
         self.cards_per_request += cards_on_req
         self.turn_number += 1
