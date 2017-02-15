@@ -420,8 +420,8 @@ class DataBall :
                     g = [l[0] for l in self.curs.fetchall()] # get all the queries
                     
                     for i in range(len(g)): 
-                        
-                        t = datetime.datetime.strptime(g[i],"%H:%M:%S - %m/%d/%Y")
+                        g_ = g[i][:7]
+                        t = datetime.datetime.strptime(g_,"%H:%M:%S")
                         # parse out a datetime object from this string... ^^^ 
                         # ... then create a timedelta object out of it
                         elapsed = datetime.timedelta(hours=t.hour,minutes=t.minute,seconds=t.second)
