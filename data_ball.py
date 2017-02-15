@@ -152,6 +152,13 @@ class DataBall :
         if (self.empty_guesses > self.top_empty_guess_ct):
                 self.top_empty_guess_ct = self.empty_guesses
         
+        print("Do you want to see your most recent game's statistics?")
+        see_stats = [input("Type (1) for 'yes', (2) for 'no")]
+        see_stats = self.validate_input(see_stats,'option')
+        
+        if see_stats[0] == 1:
+            self.print_stats(ts_str,elapsed_str,avg_per_request,self.top_empty_guess_ct,self.num_turns,self.difficulty)
+        
         # write game stats to database
         self.curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
                           "longest_draw, avg_per_request, difficulty,num_turns)"+
@@ -167,12 +174,13 @@ class DataBall :
         # close connection to database
         self.conn.close()
     
-    def print_stats(self,ts_str,elapsed,avg_per_request,top_empty_guess_ct,turn_number):
+    def print_stats(self,ts_str,elapsed,avg_per_request,top_empty_guess_ct,turn_number,difficulty):
         """
         Print the current game's statistics.
         """
         
         print('Start time: {}'.format(ts_str))
+        print('Difficulty: {}'.format(difficulty))
         print('Game length (in time) : {}'.format(elapsed))
         print('Game length (in turns): {}'.format(turn_number))
         print('Average # cards traded per request : {}'.format(avg_per_request))
