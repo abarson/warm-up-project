@@ -11,7 +11,7 @@ SHOW_RULES = "rules"
 SHOW_HAND = "show"
 SHOW_SCORE = "score"
 SHOW_BOOKS = "books"
-GO_FISH = "go fish"
+GO_FISH = "draw"
 SKIP_TURN = "skip"
 CHECK_STOCK = "stock"
 HAND_SIZE = 7
@@ -19,7 +19,7 @@ HAND_SIZE = 7
 def main():
     dataBall = DataBall()
     print("Welcome to Go Fish!")
-    request = gameStart()
+    request = gameStart(dataBall)
     gameGoing = (request == "go")
                 
     if (gameGoing):
@@ -33,12 +33,9 @@ def main():
                     print("Please enter either 0, 1, or 2.")
             except:
                 print("Please enter either 0, 1, or 2.")
-                
+
+        dataBall.difficulty =   difficulty             
         print("Game start!")
-        
-        #dataBall = DataBall(difficulty)
-        #dataBall.update()
-        #start creating all the objects
         
         stock = Deck()
         stock.shuffle()
@@ -71,6 +68,10 @@ def main():
             print("\n~~~~~YOUR HAND~~~~~")
             player.deck.printDeck()
             print("~~~~~~~~~~~~~~~~~~~\n")
+            if (handEmpty and stockEmpty):
+                print("Your deck and the stock deck are empty. Type \"", SKIP_TURN, "\".", sep = "")
+            elif (handEmpty):
+                print("Your deck is empty. Type \"", GO_FISH, "\".", sep = "")
             request = input("What would you like? ")
             if (request != SENTINEL):
                 formated_request = parseInput(request)
@@ -111,10 +112,9 @@ def main():
                         print("The stock and your hand are empty. There is nothing else you can do.")
                     incorrectAsk = False
                 elif (request != SENTINEL):
+                    
                     #make sure the player is asking for a card they have already
                     if (request != GO_FISH and player.deck.hasCard(formated_request)):
-                        #get rid of the question mark so it can be printed
-                        #request = request[0:-1]
                         request = formatRank(formated_request)
                         incorrectAsk = False #a valid card was asked for
                         if (opponent.checkDeck(formated_request)): ##let the opponent lie!
@@ -124,6 +124,10 @@ def main():
                                 opponent.setRecentCard(None)
                             #just so it prints out grammatically correct
                             amount = opponent.deck.count(formated_request)
+
+                            #update the databall
+                            dataBall.update(amount)
+                            
                             numString = ""
                             plural = ""
                             if (amount == 1):
@@ -207,6 +211,10 @@ def main():
                 if (player.deck.hasCard(request)):
                     opponent.setRecentCard(None)
                     amount = player.deck.count(request)
+
+                    #update the databall
+                    dataBall.update(amount)
+                    
                     numString = ""
                     plural = ""
                     if (amount == 1):
@@ -260,22 +268,40 @@ def main():
         print("All 13 books have been laid down!")
         print("Player Score:", player.books)
         print("Opponent Score:",opponent.books)
+        win = 0
         if (player.books > opponent.books):
             print("Congratulations! You won!!")
+            win = 1
         elif (player.books < opponent.books):
             print("The opponent won!")
         else:
             print("It's a tie!")
+        answer = input("Would you like to see your stats? (y/n) ")
+        while(answer!="y" and answer!="n" and answer!="yes" and answer!="no"):
+            s = "Please enter either \"y\" or \"n\" "
+            answer = input(s)
+        
+        dataBall.close(win)
     else:
+        answer = input("Would you like to see your stats? (y/n) ")
+        while(answer!="y" and answer!="n" and answer!="yes" and answer!="no"):
+            s = "Please enter either \"y\" or \"n\" "
+            answer = input(s)
         print("Goodbye!")
+        #don't save results
+        dataBall.hard_close()
+    
 
 #helps the user get oriented upon opening the application. Should eventually include commands for database.
-def gameStart():
+def gameStart(dataBall):
     command = ""
     while (command != "go" and command != SENTINEL):
-        command = input("Enter \"go\" to start the game, or \"help\" for more options: ")
+        command = input("Enter \"go\" to start the game, \"stats\" to enter STATISTIC CENTER, or \"help\" for more options: ")
         if (command != "go" and command != SENTINEL):
-            if (command == "help"):
+            if (command == "stats"):
+                dataBall.stats_center()
+                #helpMethods()
+            elif (command == "help"):
                 helpMethods()
             elif (command == SHOW_RULES):
                 showRules()
