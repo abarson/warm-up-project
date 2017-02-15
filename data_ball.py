@@ -146,8 +146,8 @@ class DataBall :
         ts_str          = self.ts.strftime("%H:%M:%S - %m/%d/%Y")
         
         # computer average number of cards per request
-        avg_per_request = self.cards_per_request/self.turn_number    
-        
+        avg_per_request = self.cards_per_request/self.turn_number 
+           
         # check one last time for empty guess streak
         if (self.empty_guesses > self.top_empty_guess_ct):
                 self.top_empty_guess_ct = self.empty_guesses
@@ -157,7 +157,7 @@ class DataBall :
         see_stats = self.validate_input(see_stats,'option')
         
         if see_stats[0] == 1:
-            self.print_stats(ts_str,elapsed_str,avg_per_request,self.top_empty_guess_ct,self.turn_number,self.difficulty)
+            self.print_stats(ts_str,elapsed_str,str(avg_per_request)[:5],self.top_empty_guess_ct,self.turn_number,self.difficulty)
         
         # write game stats to database
         self.curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
@@ -177,10 +177,13 @@ class DataBall :
     def print_stats(self,ts_str,elapsed,avg_per_request,top_empty_guess_ct,turn_number,difficulty):
         """
         Print the current game's statistics.
+        
+        Each parameter is a reflection of in game statistics gathered mid game.
         """
+        diff_dict = {0: 'Simple',1: 'Smart',2: 'Devious'}
         
         print('Start time: {}'.format(ts_str))
-        print('Difficulty: {}'.format(difficulty))
+        print('Difficulty: {}'.format(diff_dict[difficulty]))
         print('Game length (in time) : {}'.format(elapsed[:7]))
         print('Game length (in turns): {}'.format(turn_number))
         print('Average # cards traded per request : {}'.format(avg_per_request))
