@@ -4,7 +4,7 @@ AUTHOR: Dan Berenberg
 import sqlite3
 import datetime
 import os
-from warmup_build_db.py import BuildDB
+from warmup_build_db import BuildDB
 
 class DataBall :
     
