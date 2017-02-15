@@ -156,6 +156,7 @@ def formatRank(rank):
 
 #This class has list of cards, and methods for creating, viewing, and manipulating the list
 #in various ways important to how Go Fish is played
+#Author: Amanda Bertschinger
 from random import shuffle
 class Deck():
     #Deck constructor, makes a default deck with 52 unique cards added to the list
