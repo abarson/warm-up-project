@@ -73,11 +73,11 @@ class BuildDB:
         curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
                             "longest_draw, avg_per_request, difficulty,num_turns)"+
                             " VALUES (?,?,?,?,?,?,?)",(ts,ts_elapsed,user_win,longest_draw,avg_per_request,difficulty,num_turns))
-        
+        conn.commit()
         curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
                             "longest_draw, avg_per_request, difficulty,num_turns)"+
                             " VALUES (?,?,?,?,?,?,?)",(ts1,ts_elapsed1,user_win1,longest_draw1,avg_per_request1,difficulty1,num_turns1))
-        
+        conn.commit()
         curs.execute("INSERT INTO game_stats (ts_begin,ts_elapsed, user_win,"+
                             "longest_draw, avg_per_request, difficulty,num_turns)"+
                             " VALUES (?,?,?,?,?,?,?)",(ts2,ts_elapsed2,user_win2,longest_draw2,avg_per_request2,difficulty2,num_turns2))

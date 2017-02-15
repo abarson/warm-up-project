@@ -31,35 +31,35 @@ class DataBall :
         -Average value for longest streaks of empty guesses
         
     Please find below the source code to the DataBall. As mentioned before, 
-    it is broken into three sections that are delimited by rows of #.
+    it is broken into three sections that are delimited by rows of #. 
     
     *-------------------------------------------*
     |                 Index                     |
     |                                           |
     |  line numbers           contents          |
     *-------------------------------------------*
-    |   65  - 123       DataBall Constructor    |
+    |   65  - 125       DataBall Constructor    |
     *-------------------------------------------*
-    |   124 - 217      In Game Methods          |
-    |    *128 - 168       - close               |
-    |    *170 - 179       - print_stats         |
-    |    *181 - 187       - hard_close          |
-    |    *189 - 216       - update              |
+    |   127 - 230      In Game Methods          |
+    |    *131 - 178       - close               |
+    |    *180 - 193       - print_stats         |
+    |    *195 - 201       - hard_close          |
+    |    *203 - 230       - update              |
     *-------------------------------------------*
-    |   218 - 477      Statistics Methods       |
-    |    *222 - 239       - games_played        |
-    |    *241 - 259       - games_won           |
-    |    *261 - 273       - win_los_ratio       |
-    |    *275 - 296       - avg_per_req         |
-    |    *298 - 361       - superlative_game_len|
-    |    *363 - 429       - avg_game_len        |
-    |    *431 - 433       - longest_streak      |
-    |    *435 - 447       - avg_streak          |
+    |   232 - 503      Statistics Methods       |
+    |    *236 - 253       - games_played        |
+    |    *255 - 273       - games_won           |
+    |    *275 - 289       - win_los_ratio       |
+    |    *291 - 312       - avg_per_req         |
+    |    *314 - 387       - superlative_game_len|
+    |    *389 - 445       - avg_game_len        |
+    |    *447 - 472       - longest_streak      |
+    |    *474 - 495       - avg_streak          |
     *-------------------------------------------*
-    |   479 - 790      Statistics Center Methods|
-    |    *483 - 671       - stats_center        |
-    |    *673 - 745       - validate_input      |
-    |    *747 - 790       - chosen_9            |
+    |   504 - 819      Statistics Center Methods|
+    |    *508 - 691       - stats_center        |
+    |    *693 - 772       - validate_input      |
+    |    *774 - 815       - chosen_9            |
     *-------------------------------------------*
 """
     def __init__(self,difficulty=0):
@@ -97,9 +97,12 @@ class DataBall :
         ------------------------------------------------------------------------  
         top_empty_guess_ct  int                   highest streak of guesses that
                                                   recieve 0 cards
-        ------------------------------------------------------------------------                             
+        ------------------------------------------------------------------------    
+        default_val      int (= 3 )           the default number of games loaded into the database                  
                                         
         """
+        self.default_val = 3
+        
         if (not os.path.exists('go_fish.db')):
             db = BuildDB()
             del db
@@ -225,7 +228,7 @@ class DataBall :
         # increment number of cards per request and turn number
         self.cards_per_request += cards_on_req
         self.turn_number += 1
-    
+        
 ################################################################################
 ########################## Statistics Methods ##################################
 ################################################################################
@@ -247,7 +250,7 @@ class DataBall :
             self.curs.execute("SELECT * FROM game_stats WHERE difficulty = ?",(str(diff),))
             total += len(self.curs.fetchall())
         
-        return total
+        return self.prevent_negative(total-self.default_val)
     
     def games_won(self,difficulties=[0,1,2]):
         """
@@ -279,10 +282,11 @@ class DataBall :
             difficulties     list      specified difficulties to query 
         ------------------------------------------------------------------------
         """
-        if (choice == 'win'):
-            return self.games_won(difficulties)/self.games_played(difficulties)
         
-        return (self.games_played(difficulties) - self.games_won(difficulties)/self.games_played(difficulties))
+        if self.games_played(difficulties)-self.default_val <=0:
+            return 0
+            
+        return (self.games_played(difficulties)- self.default_val)/((self.games_played(difficulties)-self.default_val))
         
     def avg_per_req(self,difficulties=[0,1,2]):
         """
@@ -304,7 +308,8 @@ class DataBall :
             for avg in self.curs.fetchall():
                 avgs.append(avg[0])
         
-        return str(sum(avgs)/len(avgs))[:5]
+        answer = str(self.prevent_negative(sum(avgs)/(.1+(len(avgs)-self.default_val))))
+        return answer[:5]
         
     def superlative_game_len(self,time_metric,superl, difficulties=[0,1,2]):
         """
@@ -453,7 +458,6 @@ class DataBall :
             the maximum length of a streak and the time stamp of the game.
         
         """
-        
         streaks = []  
         for diff in difficulties: # iterate through difficulties, query db and 
                                       # append fetched data to a list of streaks                              
@@ -484,8 +488,18 @@ class DataBall :
             # query database for longest 0 draw streaks
             self.curs.execute("SELECT longest_draw FROM game_stats WHERE difficulty = ?",(diff,))
             streaks+=[l[0] for l in self.curs.fetchall()] # extract each 0 draw stat and concatenate to streaks
-            
-        return sum(streaks)/len(streaks) #return the average
+        if (len(streaks)-self.default_val) == 0:
+            return 0
+        answer=self.prevent_negative(sum(streaks)/((len(streaks)-self.default_val)))
+        
+        return answer #return the average (-3 is the default value)
+      
+    def prevent_negative(self,calculation):
+         
+        if calculation < 0:
+            return 0
+             
+        return calculation 
              
 ################################################################################
 ############################ Statistics Center #################################                    
@@ -496,11 +510,7 @@ class DataBall :
         A method to service statistics queries off the database. 
         Validates input unless an egregious mistake is made, in which case
         the statistics center is closed and the user is returned to the main loop
-        
-        --ABOUT 90% FINISHED--
-        
-        --- need to have the rest of the game fully functional before being able to finish
-        
+
         Design:
             
             -Command line input from sequence of menus
@@ -676,7 +686,7 @@ class DataBall :
                 keep_going = self.validate_input(keep_going,'option')
                 
 
-            except Exception as e:
+            except Exception:
                 print('Oops! an error occurred, sending back to main menu...')
                 return
            
@@ -701,17 +711,16 @@ class DataBall :
             # choice dictionary used to format validation message
             choices = {'difficulty':'0 and 2',
                     'menu option':'1 and 9',
-                    'option for returning':'1 and 2',
+                    'option for return':'1 and 2',
                     'option':'1 and 2'}
-        
+            
+            if elts == [' ']:
+                elts = ['<enter>',]
+            
             # iterate throughout list
             for i in range(len(elts)):
-                
                 #attempt to verify the element as integer
                 try:
-                
-                    elts[i] = int(elts[i])
-                
                     # dictionary of conditions to be compared against the 
                     # elements that are not yet integers
                     #
@@ -719,20 +728,20 @@ class DataBall :
                     # Suppose elts[i] = '12' and c = 'menu option'. 
                     #
                     # Then condits[c] = False. This will raise an
-                    # exception, forcing a while loop (line 558) to get good input.
-                
-                    condits = {'difficulty':elts[i] in [n for n in range(3)],
-                        'menu option':elts[i] in [n for n in range(1,10)],
-                        'option for return':elts[i] in [1,2],
-                        'option':elts[i] in [1,2]}
+                    # exception, forcing a while loop (line 558) to get good input
                         
+                    condits = {'difficulty':elts[i] in [str(n) for n in range(3)],
+                        'menu option':elts[i] in [str(n) for n in range(1,10)],
+                        'option for return':elts[i] in ['1','2'],
+                        'option':elts[i] in ['1','2']}
+                    
                     if condits[c]:
                         pass
                     
                     else:
-                        raise Exception
+                        raise ValueError
                     
-                except Exception: # if element fails to be verified
+                except ValueError: # if element fails to be verified
 
                     while not condits[c]: # as long as the input is not valid, keep asking
                                         # for input
@@ -741,20 +750,25 @@ class DataBall :
                         print("{} is not an option. Choose a {} between {}.".format(elts[i],c,choices[c]))
                     
                         # get more input
-                        elts[i] = int(input('Enter option : '))
-                    
+                        new_elt = input('Enter option : ')
+
+                        #validate against <enter>
+                        if new_elt == "":
+                            new_elt = '<enter>'
+                        elts[i] = new_elt
+                        
                         # update conditions dictionary
-                        condits = {'difficulty':elts[i] in [n for n in range(3)],
-                        'menu option':elts[i] in [n for n in range(1,10)],
-                        'option for return':elts[i] in [1,2],
-                        'option':elts[i] in [1,2]}
+                        condits = {'difficulty':elts[i] in [str(n) for n in range(3)],
+                        'menu option':elts[i] in [str(n) for n in range(1,10)],
+                        'option for return':elts[i] in ['1','2'],
+                        'option':elts[i] in ['1','2']}
                         
                 # cast this validated input as an int
                 elts[i] = int(elts[i])
         
             return elts
         
-        except Exception:
+        except SyntaxError:
             print('Error Occurred!')
         
     def chosen_9(self,queries):
@@ -780,10 +794,8 @@ class DataBall :
                         "Would you like to go back now or after the other queries?")
                 
                 quit = [input("Type 1 for 'now' or 2 for 'later' and press enter: ")]
-                
                 # validate the input
                 quit = self.validate_input(quit,'option for return')
-                
                 if quit[0] == 1: # if user wants to leave now, return true to
                                  # quit out of stats_center
                                  
