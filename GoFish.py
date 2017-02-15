@@ -264,6 +264,7 @@ def main():
             if (len(laidDown.cards) == 52):
                 gameGoing = False
     print("~~~~~GAME OVER~~~~~")
+    #if this is true, it means the user didn't prematurely quit the game
     if (request != SENTINEL):
         print("All 13 books have been laid down!")
         print("Player Score:", player.books)
@@ -276,18 +277,12 @@ def main():
             print("The opponent won!")
         else:
             print("It's a tie!")
-        answer = input("Would you like to see your stats? (y/n) ")
-        while(answer!="y" and answer!="n" and answer!="yes" and answer!="no"):
-            s = "Please enter either \"y\" or \"n\" "
-            answer = input(s)
-        
+        #save results
         dataBall.close(win)
+    #user prematurely quit the game
     else:
-        answer = input("Would you like to see your stats? (y/n) ")
-        while(answer!="y" and answer!="n" and answer!="yes" and answer!="no"):
-            s = "Please enter either \"y\" or \"n\" "
-            answer = input(s)
         print("Goodbye!")
+        
         #don't save results
         dataBall.hard_close()
     
