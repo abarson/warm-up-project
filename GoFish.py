@@ -5,6 +5,8 @@ from Game_Utilities import Opponent
 from Game_Utilities import Player
 from Game_Utilities import formatRank
 
+##Author Adam Barson -> Team lead
+
 #set constant values for commands
 SENTINEL = "stop"
 HELP = "help"

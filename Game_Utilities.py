@@ -1,4 +1,6 @@
 from random import randint
+#The Opponent class represents the computer player. It holds fields for the deck and difficulty, and also
+#maintains an iterative card rotation. Decision making for what card to ask for is done in this class.
 class Opponent():
     def __init__(self, deck, difficulty, laidDown):
         self.deck = deck
@@ -38,8 +40,6 @@ class Opponent():
         if (self.difficulty < 2):
             return hasCard
         else:
-            #print("Lie counter:", self.lieCounter)
-            #lie every third time
             if (hasCard and self.lieCounter % 3 == 0):
                 print(">:-)")
                 self.lieCounter+=1
@@ -49,8 +49,10 @@ class Opponent():
                 return hasCard
             else:
                 return hasCard
-
-    ##depending on difficulty and recentCard, the opponent asks the user for a card
+     #Returns the rank of a card to ask for, depending on the difficulty.  If the
+     #lowest difficulty, it choses a random rank from its hand.  If the top two difficulties
+     #choses the rank of the latest card it recieved, or the rank of a card it has in its hand
+     #based on a continuing card rotation
     def ask(self):
         #just choose a random card from its hand
         if (self.difficulty == 0):
@@ -152,7 +154,8 @@ def formatRank(rank):
 #in various ways important to how Go Fish is played
 from random import shuffle
 class Deck():
-    #this allows default construction, where 52 cards are added to a list, or it allows a list to be passed in
+    #Deck constructor, makes a default deck with 52 unique cards added to the list
+    #It also contains the ability to pass in a list to form a custom deck
     def __init__(self, i = None):
         if i is None:
             self.cards = []
@@ -163,7 +166,8 @@ class Deck():
             self.cards = i
         
             
-    #Checks through the deck to see if it contains a certain card   
+    #Checks through the deck to see if it contains cards of a certain rank,
+    #with said rank as a parameter, and returning either true or false.  
     def hasCard(self, rank):
         for i in range(len(self.cards)):
             if(self.cards[i].checkEquals(rank)):
@@ -187,20 +191,15 @@ class Deck():
                     newList.append(self.cards[i])
             self.cards = newList
         return removed
-        #required some major changes because python is dumb
     
     #adds newCards to this Deck's cards
     def addCards(self, newCards):
         for i in range(len(newCards)):
             self.cards.append(newCards[i])
-
-        #fixed: can't append a list to a list?
             
     #checks to see if this Deck has four of the same rank card
     def hasBook(self, rank):
         return (self.count(rank) == 4)
-    
-        #fixed using count
     
     #counts the occurrence of rank Card in the deck and returns it
     def count(self, rank):
@@ -210,21 +209,17 @@ class Deck():
                 counter+=1
         return counter
 
-        #fixed: compare cards[i] and rank with checkEquals
-
     #adds a single card to this deck
     def addCard(self, card):
         self.cards.append(card)
 
-    #sorts card based on rank
+    #sorts card based on rank, from lowest to highest.
     def sort(self):
         self.cards = sorted(self.cards, key=lambda card: card.rank)
     
     #randomizes the order of cards in the deck
     def shuffle(self):
         shuffle(self.cards)
-
-        #fixed: shuffle is an in-place "unsort", doesn't return anything
         
     #removes the top n=size cards from the deck and returns them as a list
     def deal(self,size):
@@ -235,7 +230,6 @@ class Deck():
             return dealt
         else:
             print("Deck is too small!")
-        #fixed: dealt needed append method
     
     #removes only the top card from the deck and returns it
     def dealTop(self):
