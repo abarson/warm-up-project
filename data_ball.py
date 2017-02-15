@@ -695,62 +695,65 @@ class DataBall :
             'option' -> validates general input for the shortest/longest game in turns/time
                                 
         """
+        try: 
+            # choice dictionary used to format validation message
+            choices = {'difficulty':'0 and 2',
+                    'menu option':'1 and 9',
+                    'option for returning':'1 and 2',
+                    'option':'1 and 2'}
         
-        # choice dictionary used to format validation message
-        choices = {'difficulty':'0 and 2',
-                   'menu option':'1 and 9',
-                   'option for returning':'1 and 2',
-                   'option':'1 and 2'}
-        
-        # iterate throughout list
-        for i in range(len(elts)):
-            
-            #attempt to verify the element as integer
-            try:
+            # iterate throughout list
+            for i in range(len(elts)):
                 
-                elts[i] = int(elts[i])
+                #attempt to verify the element as integer
+                try:
                 
-                # dictionary of conditions to be compared against the 
-                # elements that are not yet integers
-                #
-                # Ex:
-                # Suppose elts[i] = '12' and c = 'menu option'. 
-                #
-                # Then condits[c] = False. This will raise an
-                # exception, forcing a while loop (line 558) to get good input.
-            
-                condits = {'difficulty':elts[i] in [n for n in range(3)],
-                       'menu option':elts[i] in [n for n in range(1,10)],
-                       'option for return':elts[i] in [1,2],
-                       'option':elts[i] in [1,2]}
-                       
-                if condits[c]:
-                    pass
-                    
-                else:
-                    raise NameError
-                    
-            except NameError: # if element fails to be verified
-
-                while not condits[c]: # as long as the input is not valid, keep asking
-                                      # for input
-                    
-                    # formatted validation message
-                    print("{} is not an option. Choose a {} between {}.".format(elts[i],c,choices[c]))
-                    
-                    # get more input
-                    elts[i] = input('Enter option : ')
-                    
-                    # update conditions dictionary
+                    elts[i] = int(elts[i])
+                
+                    # dictionary of conditions to be compared against the 
+                    # elements that are not yet integers
+                    #
+                    # Ex:
+                    # Suppose elts[i] = '12' and c = 'menu option'. 
+                    #
+                    # Then condits[c] = False. This will raise an
+                    # exception, forcing a while loop (line 558) to get good input.
+                
                     condits = {'difficulty':elts[i] in [n for n in range(3)],
-                       'menu option':elts[i] in [n for n in range(1,10)],
-                       'option for return':elts[i] in [1,2],
-                       'option':elts[i] in [1,2]}
-                       
-            # cast this validated input as an int
-            elts[i] = int(elts[i])
+                        'menu option':elts[i] in [n for n in range(1,10)],
+                        'option for return':elts[i] in [1,2],
+                        'option':elts[i] in [1,2]}
+                        
+                    if condits[c]:
+                        pass
+                    
+                    else:
+                        raise NameError
+                    
+                except NameError: # if element fails to be verified
+
+                    while not condits[c]: # as long as the input is not valid, keep asking
+                                        # for input
+                    
+                        # formatted validation message
+                        print("{} is not an option. Choose a {} between {}.".format(elts[i],c,choices[c]))
+                    
+                        # get more input
+                        elts[i] = input('Enter option : ')
+                    
+                        # update conditions dictionary
+                        condits = {'difficulty':elts[i] in [n for n in range(3)],
+                        'menu option':elts[i] in [n for n in range(1,10)],
+                        'option for return':elts[i] in [1,2],
+                        'option':elts[i] in [1,2]}
+                        
+                # cast this validated input as an int
+                elts[i] = int(elts[i])
         
-        return elts
+            return elts
+        
+        except ValueError:
+            print('Error Occurred!')
         
     def chosen_9(self,queries):
         
